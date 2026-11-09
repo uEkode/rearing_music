@@ -25,7 +25,7 @@ $classFiles = @(Get-ChildItem -LiteralPath (Join-Path $build 'classes') -Recurse
 & (Join-Path $JdkHome 'bin/java.exe') -cp (Join-Path $tools 'lib/d8.jar') com.android.tools.r8.D8 --lib $platform --min-api 26 --output (Join-Path $build 'dex') @classFiles
 Check-Result 'DEX compilation'
 Copy-Item -LiteralPath (Join-Path $build 'resources.apk') -Destination (Join-Path $build 'unsigned.apk')
-Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 $zip = [System.IO.Compression.ZipFile]::Open((Join-Path $build 'unsigned.apk'),[System.IO.Compression.ZipArchiveMode]::Update)
 try { [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $build 'dex/classes.dex'),'classes.dex') | Out-Null } finally { $zip.Dispose() }
 & (Join-Path $tools 'zipalign.exe') -f -p 4 (Join-Path $build 'unsigned.apk') (Join-Path $build 'aligned.apk')
