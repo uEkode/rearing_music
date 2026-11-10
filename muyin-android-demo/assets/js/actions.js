@@ -15,23 +15,10 @@ const {openPushSheet,showSheet,closeSheet}=MY.sheets;
 
 /* ---------- 交互 ---------- */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab],[data-calm],[data-open],[data-alert],[data-metric],[data-mode],[data-tpl],[data-play],[data-lib],[data-filt],[data-done],[data-mi],[data-push],[data-toast],[data-recheck],[data-close],[data-calm2],[data-tgt],[data-grant],[data-info],[data-libcat],[data-pcfg],[data-plevel],[data-miniplay]');
+  const t=e.target.closest('[data-tab],[data-open],[data-alert],[data-metric],[data-mode],[data-tpl],[data-play],[data-lib],[data-filt],[data-barnfilt],[data-done],[data-mi],[data-push],[data-toast],[data-recheck],[data-close],[data-calm2],[data-tgt],[data-grant],[data-info],[data-libcat],[data-pcfg],[data-plevel],[data-miniplay]');
   if(!t)return;
   const d=t.dataset;
   if(d.tab){go(d.tab);return}
-  if(d.calm){
-    const b=barn(d.calm);
-    if(!b)return;
-    if(!b.online){toast(`${b.nm} 声压设备离线，无法下发音频`);return}
-    S.target=b.id;
-    S.sessionCounted=false;
-    S.tpl=ds.stressLevel(b)==='high'?'sleep':'night';
-    const tpl=ds.templates()[S.tpl];
-    S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};
-    S.playing=false;
-    go('music');
-    toast(`已带入 ${b.nm} · ${tpl.nm}，点击播放开始干预`);
-    return}
   if(d.open){
     const b=barn(d.open);
     if(!b)return;
@@ -64,7 +51,10 @@ document.addEventListener('click',e=>{
       </div>
       </div>
       <div class="sticky">
-        <button type="button" class="btn" data-calm2="${b.id}">♫ 快捷安抚</button>
+        ${b.online
+          ? `<button type="button" class="btn" data-calm2="${b.id}">♫ ${b.interv==='watch'?'再次安抚':'快捷安抚'}</button>
+        ${b.interv==='watch'?`<button type="button" class="btn ghost" style="margin-top:9px" data-recheck="${b.id}">✓ 复测通过</button>`:''}`
+          : `<button type="button" class="btn ghost" style="border-color:#D9DCD6;color:#9AA09A;cursor:default" disabled>设备离线 · 不可干预</button>`}
         <button type="button" class="btn ghost" style="margin-top:9px" data-close="1">关闭</button>
       </div>`);
     return}
@@ -73,7 +63,7 @@ document.addEventListener('click',e=>{
     const b=barn(d.calm2);
     if(!b)return;
     if(!b.online){toast('演示设备离线，无法干预');return}
-    $('sheet').classList.remove('on');
+    MY.sheets.hideSheet();
     S.target=b.id;S.sessionCounted=false;S.tpl=ds.stressLevel(b)==='high'?'sleep':'night';
     const tpl=ds.templates()[S.tpl];
     S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};S.playing=false;go('music');
@@ -117,12 +107,14 @@ document.addEventListener('click',e=>{
     render();return}
   if(d.lib){toast('模拟试听 · 本版不播放真实音频');return}
   if(d.filt){S.filt=d.filt;render();return}
+  if(d.barnfilt){S.barnFilt=d.barnfilt;render();return}
   if(d.recheck){
     const b=barn(d.recheck);
     if(!b||b.interv!=='watch')return;
     b.interv=null;b.db=Math.max(56,b.db-14);
     b.tip='声环境平稳，保持当前音量即可';
-    render();
+    /* 复测入口在圈舍详情弹层里，处理完把弹层收掉并刷新列表 */
+    if($('sheet').classList.contains('on'))closeSheet();else render();
     toast(`${b.nm} 模拟复测通过 · 已恢复「正常」`);return}
   if(d.info){e.stopPropagation();S.popInfo=!S.popInfo;render();return}
   if(d.libcat){S.libCat=d.libcat;render();return}

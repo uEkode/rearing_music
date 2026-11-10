@@ -138,6 +138,16 @@ F.eventStatusLabels={
 };
 F.eventFilters=[['all','全部'],['pending','待处理'],['done','已处理']];
 
+/* ---------- 圈舍状态分类 ----------
+   active = 干预中（含恢复观察）；stress = 轻度与高度应激；其余按正常/离线 */
+F.barnFilters=[
+  ['all','全部'],
+  ['active','干预中'],
+  ['stress','应激'],
+  ['normal','正常'],
+  ['offline','离线']
+];
+
 /* ---------- 消息推送设置 ---------- */
 F.push={
   groups:[

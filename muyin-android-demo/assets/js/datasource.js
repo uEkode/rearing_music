@@ -41,6 +41,13 @@ const ds={
     return MY.stress.label(MY.stress.evaluate(b).key);
   },
   stressLevel:b=>MY.stress.evaluate(b).key,
+  /* 分类口径：离线 > 干预中（含恢复观察） > 应激（轻度/高度） > 正常 */
+  barnCategory:b=>{
+    if(!b||b.online===false)return 'offline';
+    if(b.interv==='playing'||b.interv==='watch')return 'active';
+    return MY.stress.evaluate(b).key==='normal'?'normal':'stress';
+  },
+  barnFilters:()=>F.barnFilters,
   barnFacts:id=>F.barnFacts[id]||{todayInterv:0,peakDb:0,device:{battery:'—',offlineAt:''}},
   curve24h:()=>F.barnCurve24h,
 

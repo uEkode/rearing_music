@@ -13,7 +13,7 @@ const S={
   /* 圈舍与事件是可变的演示数据，从 fixtures 拷贝一份 */
   barns:JSON.parse(JSON.stringify(F.barns)),
   events:JSON.parse(JSON.stringify(F.events)),
-  interv:F.metrics.interv, filt:'all', sessionCounted:false,
+  interv:F.metrics.interv, filt:'all', barnFilt:'all', sessionCounted:false,
   popInfo:false, libQ:'', libCat:'all',
   target:'B2', mode:'manual', tpl:'sleep', playing:false, vol:65,
   track:{nm:F.templates.sleep.track,s:F.templates.sleep.out,pos:84,dur:240},

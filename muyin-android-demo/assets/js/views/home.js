@@ -1,4 +1,5 @@
-/* 首页：圈舍总览。返回 HTML 字符串，由 app.render() 放进 #scroll。 */
+/* 首页：圈舍总览。返回 HTML 字符串，由 app.render() 放进 #scroll。
+   圈舍卡只做展示，安抚、复测等操作都在圈舍详情弹层里完成。 */
 (function (MY) {
 'use strict';
 
@@ -8,8 +9,13 @@ const {unreadBadge}=MY.ui;
 
 function viewHome(){
   const m=ds.metrics(), copy=ds.copy(), farm=ds.farm();
-  /* 只展示已授权圈舍，且全部列出（不再折叠） */
-  const shown=ds.homeBarns();
+  const all=ds.homeBarns();
+  const filt=S.barnFilt||'all';
+  const shown=filt==='all'?all:all.filter(b=>ds.barnCategory(b)===filt);
+  const chips=ds.barnFilters().map(f=>{
+    const label=f[0]==='all'?f[1]+' '+all.length:f[1];
+    return `<button type="button" class="chip ${filt===f[0]?'on':''}" data-barnfilt="${f[0]}" aria-pressed="${filt===f[0]}">${label}</button>`;
+  }).join('');
   const s=shown.map(b=>{
     const [tn,tc]=ds.barnStatus(b);
     const level=ds.stressLevel(b);
@@ -21,13 +27,6 @@ function viewHome(){
       <div class="dbrow"><b style="color:${warn?'var(--red)':mild?'var(--orange)':!b.online?'#B9BEB8':'var(--green)'}">${b.db}</b>
         <span class="unit">dB</span><i>· 1小时均值</i></div>
       <div class="tip ${warn?'warn':mild?'':'ok'}"><span>${warn||mild?'!':'◖'}</span><span>${b.tip}</span></div>
-      ${b.interv==='watch'
-        ?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-            <button type="button" class="btn ghost" data-recheck="${b.id}">✓ 复测通过</button>
-            <button type="button" class="btn" data-calm="${b.id}">♫ 再次安抚</button></div>`
-        :!b.online
-        ?`<button type="button" class="btn ghost" style="border-color:#D9DCD6;color:#9AA09A;cursor:default" disabled>设备离线 · 不可干预</button>`
-        :`<button type="button" class="btn" data-calm="${b.id}">♫ 快捷安抚</button>`}
     </div>`;
   }).join('');
   const badge=unreadBadge();
@@ -43,8 +42,9 @@ function viewHome(){
     </div>
     ${S.popInfo?`<div class="pop">${copy.statsNote}</div>`:''}
     <div class="sect"><h2>圈舍状态</h2>
-      <span>全部 ${shown.length} 个</span></div>
-    ${s}
+      <span>全部 ${all.length} 个</span></div>
+    <div class="chips" style="margin-bottom:12px">${chips}</div>
+    ${s||`<div style="text-align:center;padding:38px 0;color:var(--mute);font-size:13px">该分类下暂无圈舍</div>`}
     <div style="height:8px"></div>`;
 }
 
