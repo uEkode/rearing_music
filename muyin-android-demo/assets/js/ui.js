@@ -5,7 +5,7 @@
 
 const S=MY.S;
 const barn=MY.barn;
-const {PUSH_LBL}=MY.data;
+const PUSH_LBL=MY.fixtures.push.labels;
 
 const $=id=>document.getElementById(id);
 

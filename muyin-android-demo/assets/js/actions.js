@@ -7,8 +7,8 @@
 
 const S=MY.S;
 const barn=MY.barn;
+const ds=MY.ds;
 const {$,toast,pushLabel}=MY.ui;
-const {REC,STAGE,LIB}=MY.data;
 const {go,render}=MY.app;
 const {startTimer,stopTimer}=MY.player;
 const {openPushSheet,showSheet,closeSheet}=MY.sheets;
@@ -26,37 +26,39 @@ document.addEventListener('click',e=>{
     S.target=b.id;
     S.sessionCounted=false;
     S.tpl=b.st==='high'?'sleep':'night';
-    S.track={nm:REC[S.tpl].track,s:REC[S.tpl].out,pos:0,dur:240};
+    const tpl=ds.templates()[S.tpl];
+    S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};
     S.playing=false;
     go('music');
-    toast(`已带入 ${b.nm} · ${REC[S.tpl].nm}，点击播放开始干预`);
+    toast(`已带入 ${b.nm} · ${tpl.nm}，点击播放开始干预`);
     return}
   if(d.open){
     const b=barn(d.open);
     if(!b)return;
+    const facts=ds.barnFacts(b.id);
     const evs=S.events.filter(x=>x.b===b.id);
     showSheet(`<div class="close" data-close="1">✕</div>
-      <h3>${b.nm}</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${b.stock} · ${b.desc} · ${b.st==='offline'?'设备离线':'演示设备在线'}</p>
+      <h3>${b.nm}</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${b.stock} · ${b.desc} · ${ds.barnOnline(b)?'演示设备在线':'设备离线'}</p>
       <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:11px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
           <b style="font-size:13px;color:var(--green)">24小时声压曲线</b>
           <span style="font-size:11px;color:var(--mute)">实时 · 1分钟采样</span></div>
         <div style="display:flex;gap:3px;align-items:flex-end;height:64px;margin-top:12px">
-          ${[30,35,28,40,45,38,52,60,48,44,58,70,66,58,50,46,55,68,74,62,48,40,36,32]
+          ${ds.curve24h()
             .map(h=>`<i style="flex:1;background:${h>66?'var(--red)':h>52?'var(--orange)':'#C8CFC7'};
               height:${h}%;border-radius:2px;display:block"></i>`).join('')}</div>
         <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--mute);margin-top:6px">
           <span>00:00</span><span>12:00</span><span>现在</span></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px">
         <div style="background:#fff;border-radius:12px;padding:12px"><small style="font-size:11px;color:var(--mute)">今日干预</small>
-          <b style="display:block;font-size:20px;color:var(--green);margin-top:2px">${b.id==='C5'?2:b.id==='B2'?1:0} 次</b></div>
+          <b style="display:block;font-size:20px;color:var(--green);margin-top:2px">${facts.todayInterv} 次</b></div>
         <div style="background:#fff;border-radius:12px;padding:12px"><small style="font-size:11px;color:var(--mute)">近7日最高</small>
-          <b style="display:block;font-size:20px;color:var(--red);margin-top:2px">${b.db+4} dB</b></div></div>
+          <b style="display:block;font-size:20px;color:var(--red);margin-top:2px">${facts.peakDb} dB</b></div></div>
       <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:11px">
         <b style="font-size:13px;color:var(--green)">该舍事件</b>
         ${evs.length?evs.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;
           padding:9px 0;border-bottom:1px solid var(--line);font-size:12px">
-          <span>${e.tm}</span><span class="tag ${STAGE[e.st][1]}">● ${STAGE[e.st][0]}</span></div>`).join('')
+          <span>${e.tm}</span><span class="tag ${ds.eventStatus(e.st)[1]}">● ${ds.eventStatus(e.st)[0]}</span></div>`).join('')
           :'<div style="font-size:12px;color:var(--mute);padding:10px 0">近7日无事件</div>'}
       </div>
       <div class="sticky">
@@ -71,17 +73,24 @@ document.addEventListener('click',e=>{
     if(b.st==='offline'){toast('演示设备离线，无法干预');return}
     $('sheet').classList.remove('on');
     S.target=b.id;S.sessionCounted=false;S.tpl=b.st==='high'?'sleep':'night';
-    S.track={nm:REC[S.tpl].track,s:REC[S.tpl].out,pos:0,dur:240};S.playing=false;go('music');
-    toast(`已带入 ${b.nm} · ${REC[S.tpl].nm}，点击播放开始干预`);return}
+    const tpl=ds.templates()[S.tpl];
+    S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};S.playing=false;go('music');
+    toast(`已带入 ${b.nm} · ${tpl.nm}，点击播放开始干预`);return}
   if(d.alert){S.filt='pending';go('events');toast('已切换到「待处理」事件');return}
-  if(d.metric){go('events');toast(d.metric==='interv'
-    ?'「今日干预次数」明细：手动 5 · 自动 5 · 定时 2':'全场平均分贝 68 dB，较上周下降 4 dB');return}
+  if(d.metric){
+    S.filt='all';go('events');
+    const m=ds.metrics();
+    toast(d.metric==='interv'
+      ?`「今日干预次数」共 ${m.interv} 次 · 明细见下方事件列表`
+      :`全场平均分贝 ${m.avgDb} dB · 明细见下方事件列表`);
+    return}
   if(d.mode){S.mode=d.mode;render();return}
   if(d.tpl){
     S.tpl=d.tpl;
-    S.track={nm:REC[d.tpl].track,s:REC[d.tpl].out,pos:0,dur:240};
+    const tpl=ds.templates()[d.tpl];
+    S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};
     S.playing=false;render();
-    toast(`已套用「${REC[d.tpl].nm}」，点击播放开始`);return}
+    toast(`已套用「${tpl.nm}」，点击播放开始`);return}
   if(d.miniplay){
     S.playing=false;stopTimer();render();
     toast('已暂停 · 事件保持「处理中」');return}
@@ -116,23 +125,24 @@ document.addEventListener('click',e=>{
   if(d.tgt){
     const b=barn(d.tgt);
     if(!b)return;
-    if(b.st==='offline'){toast('F区·6号待用舍 声压设备离线，无法作为干预目标');return}
+    if(b.st==='offline'){toast(`${b.nm} 声压设备离线，无法作为干预目标`);return}
     stopTimer();
     S.target=b.id;S.sessionCounted=false;S.playing=false;
     S.tpl=b.st==='high'?'sleep':'night';
-    S.track={nm:REC[S.tpl].track,s:REC[S.tpl].out,pos:0,dur:240};
+    const tpl=ds.templates()[S.tpl];
+    S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};
     render();
-    toast(`目标已切换为 ${b.nm} · ${REC[S.tpl].nm}`);return}
+    toast(`目标已切换为 ${b.nm} · ${tpl.nm}`);return}
   if(d.done){
     const ev=S.events.find(x=>x.id===d.done);
     if(!ev||ev.st==='done')return;
     const wasProc=ev.st==='proc';
     if(ev.b===S.target){S.playing=false;stopTimer()}
     ev.st='done';
-    ev.note=ev.note.replace(/。$/,'')+`。已由陈志远${wasProc?'确认处理':'标记处理'}，等待复测。`;
+    ev.note=ev.note.replace(/。$/,'')+`。已由${ds.user().name}${wasProc?'确认处理':'标记处理'}，等待复测。`;
     if(!ev.cnt){S.interv++;ev.cnt=true}
     const b=barn(ev.b);
-    if(b){b.st='watch';b.tip='干预已执行，等待 10 分钟复测声压后恢复常态'}
+    if(b){b.st='watch';b.tip=ds.copy().watchTip}
     render();
     toast('已标记处理 · 首页圈舍状态与干预计数已同步');return}
   if(d.push){
@@ -141,25 +151,23 @@ document.addEventListener('click',e=>{
     toast(S.push?'推送已开启 · 首页铃铛将显示提醒':'推送已关闭 · 角标不再更新');
     return}
   if(d.mi){
-    const map={0:['硬件管理','演示设备列表'],1:['圈舍管理','6个圈舍 · 含存栏与设备绑定'],
-      2:['消息推送设置','高频应激与设备离线提醒'],3:['新手短视频教程','3分钟学会使用 · 含大字幕'],
-      4:['产品免责边界声明','本工具为辅助参考，不替代兽医诊断']};
-    if(d.mi==='0'){showSheet(`<div class="close" data-close="1">✕</div>
+    const copy=ds.copy();
+    if(d.mi==='hardware'){showSheet(`<div class="close" data-close="1">✕</div>
       <h3>硬件管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}台演示设备 · ${S.barns.filter(b=>b.st==='offline').length}台离线</p>
-      ${S.barns.map(b=>[b.nm,b.st==='offline'?'离线':'在线']).map(r=>`
+      ${S.barns.map(b=>[b,b.st==='offline'?'离线':'在线',ds.barnFacts(b.id)]).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
           padding:12px;margin-bottom:8px">
           <div style="width:34px;height:34px;border-radius:9px;background:${r[1]==='在线'?'#EDF3EC':'var(--red-l)'};
             display:grid;place-items:center;font-size:14px;color:${r[1]==='在线'?'#3E6B4A':'var(--red)'}">▤</div>
-          <div style="flex:1"><b style="font-size:13px">${r[0]}</b>
-            <div style="font-size:11px;color:var(--mute)">声压传感器 · ${r[1]==='在线'?'电量 82%':'10:24 断开'}</div></div>
+          <div style="flex:1"><b style="font-size:13px">${r[0].nm}</b>
+            <div style="font-size:11px;color:var(--mute)">声压传感器 · ${r[1]==='在线'?'电量 '+r[2].device.battery:r[2].device.offlineAt+' 断开'}</div></div>
           ${r[1]==='离线'?`<button class="btn sm ghost" style="border-color:var(--red);color:var(--red)"
             data-toast="演示提示：尚未连接真实设备">重连</button>`:''}</div>`).join('')}
-      <div class="tip" style="margin-top:6px"><span>!</span><span>离线圈舍在首页仍可见，但「快捷安抚」不可用</span></div>
+      <div class="tip" style="margin-top:6px"><span>!</span><span>${copy.hardwareTip}</span></div>
       <div class="sticky"><button class="btn" data-close="1">完成</button></div>`);}
-    else if(d.mi==='1'){showSheet(`<div class="close" data-close="1">✕</div>
-      <h3>圈舍管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">6个圈舍 · 含存栏与设备绑定</p>
-      ${S.barns.map(b=>[b.nm,b.stock.replace(/[^0-9]/g,'')||0,b.st==='offline'?'离线':'在线']).map(r=>`
+    else if(d.mi==='barns'){showSheet(`<div class="close" data-close="1">✕</div>
+      <h3>圈舍管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}个圈舍 · 含存栏与设备绑定</p>
+      ${S.barns.map(b=>[b.nm,b.stock.replace(/[^0-9]/g,'')||0,ds.barnOnline(b)?'在线':'离线']).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
           padding:12px;margin-bottom:8px">
           <div style="width:34px;height:34px;border-radius:9px;background:var(--sub);display:grid;
@@ -167,20 +175,18 @@ document.addEventListener('click',e=>{
           <div style="flex:1"><b style="font-size:13px">${r[0]}</b>
             <div style="font-size:11px;color:var(--mute)">存栏 ${r[1]} 头 · 设备${r[2]}</div></div>
           <div class="sw on"></div></div>`).join('')}
-      <div class="tip" style="margin-top:6px"><span>◖</span><span>关闭授权后，该圈舍将从首页移除</span></div>`);}
-    else if(d.mi==='4'){showSheet(`<div class="close" data-close="1">✕</div>
+      <div class="tip" style="margin-top:6px"><span>◖</span><span>${copy.barnManageTip}</span></div>`);}
+    else if(d.mi==='legal'){showSheet(`<div class="close" data-close="1">✕</div>
       <h3>产品免责边界声明</h3>
       <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
-        line-height:1.75;color:#7A5A2A;margin-top:12px">
-        本工具输出的分贝值、音乐干预建议与应激判定，<b>仅作为牧场辅助参考</b>，
-        不构成兽医诊断依据，也不替代现场人工观察。<br><br>
-        · 当前分贝、识别和效益数据均为演示数据<br>
-        · 当前不接入真实 AI、设备及系统消息推送<br>
-        · 出现连续应激或牲畜异常行为，请立即人工介入</div>
+        line-height:1.75;color:#7A5A2A;margin-top:12px">${copy.disclaimer}</div>
       <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);}
-    else if(d.mi==='2'){openPushSheet();
+    else if(d.mi==='push'){openPushSheet();
       return}
-    else toast(map[d.mi][0]+'：'+map[d.mi][1]);
+    else {
+      const item=ds.meItems().find(x=>x.key===d.mi);
+      toast(item?`${item.title}：${item.desc}`:'该功能尚未实现');
+    }
     return}
   if(d.pcfg){
     const k=d.pcfg;
@@ -212,7 +218,7 @@ document.addEventListener('input',e=>{
   S.libQ=e.target.value;
   const holder=document.getElementById('libList');
   if(!holder)return;
-  const html=LIB.filter(a=>{
+  const html=ds.library().tracks.filter(a=>{
     const okQ=!S.libQ||(a[0]+a[1]).toLowerCase().includes(S.libQ.toLowerCase());
     const okC=(S.libCat||'all')==='all'||a[4]===S.libCat;
     return okQ&&okC;

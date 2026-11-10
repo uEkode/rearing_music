@@ -4,6 +4,7 @@
 'use strict';
 
 const S=MY.S;
+const ds=MY.ds;
 const {$}=MY.ui;
 
 /* 统一打开方式：换内容 → 回到顶部 → 显示 */
@@ -15,7 +16,7 @@ function showSheet(html){
 }
 
 /* 统一关闭方式：收弹层后重渲染页面，并还原背景列表原来的滚动位置
-   （render 会重建 #scroll，不还原就会跳回顶部）。 */
+   （render 会重建 #scroll，内容高度变化时滚动位置会变）。 */
 function closeSheet(){
   const panel=$('sheetPanel');
   if(panel)panel.scrollTop=0;
@@ -29,9 +30,10 @@ function closeSheet(){
 /* ---------- 消息推送设置 ---------- */
 function pushSheetHTML(){
   const p=S.pushCfg;
-  const row=(k,ic,t,d,on,extra='')=>`
+  const cfg=ds.pushConfig();
+  const row=(k,ic,t,d,on)=>`
     <div class="mrow">
-      <div class="ic ${extra}">${ic}</div>
+      <div class="ic">${ic}</div>
       <div class="tx"><b>${t}</b>${d?`<small>${d}</small>`:''}</div>
       <div class="sw ${on?'on':''}" data-pcfg="${k}"></div>
     </div>`;
@@ -42,20 +44,13 @@ function pushSheetHTML(){
     <div class="grp">总开关</div>
     <div class="mrow">
       <div class="ic">🔔</div>
-      <div class="tx"><b>接收推送提醒</b><small>关闭后不再推送任何提醒，首页角标也不再更新</small></div>
+      <div class="tx"><b>${cfg.master.title}</b><small>${cfg.master.desc}</small></div>
       <div class="sw ${S.push?'on':''}" data-push="1"></div>
     </div>
-    <div class="grp">应激事件提醒</div>
-    ${row('high','!','高度应激告警','分贝持续 ≥ 80 dB 时立即推送',p.high)}
-    ${row('mild','~','轻度应激提醒','60–80 dB 区间，每日汇总一次',p.mild)}
-    ${row('event','▤','事件处理提醒','有事件被他人处理时通知',p.event)}
-
-    <div class="grp">设备与系统</div>
-    ${row('offline','▣','设备离线提醒','声压设备断连时推送',p.offline)}
-    ${row('daily','◷','每日数据摘要','每天 07:00 推送昨日干预效果',p.daily)}
-
+    ${cfg.groups.map(g=>`<div class="grp">${g.title}</div>
+    ${g.rows.map(r=>row(r[0],r[1],r[2],r[3],p[r[0]])).join('')}`).join('')}
     <div class="grp">免打扰时段</div>
-    ${row('dnd','☾','夜间免打扰','开启后该时段仅保留高度应激告警',p.dnd)}
+    ${row(cfg.dnd.key,cfg.dnd.ic,cfg.dnd.title,cfg.dnd.desc,p[cfg.dnd.key])}
     <div class="timepick">
       <div><small>开始</small><b>${p.dndStart}</b></div>
       <span>→</span>
@@ -65,12 +60,12 @@ function pushSheetHTML(){
 
     <div class="grp">提醒强度</div>
     <div class="chips" style="margin-bottom:14px">
-      ${[['light','仅角标'],['normal','角标+振动'],['full','角标+振动+声音']].map(x=>
+      ${cfg.levels.map(x=>
         `<div class="chip ${p.level===x[0]?'on':''}" data-plevel="${x[0]}">${x[1]}</div>`).join('')}
     </div>
 
     <div class="tip" style="margin:4px 0 8px"><span>◖</span>
-      <span>关闭全部提醒后，首页铃铛仍会显示待处理数量，但不再推送系统通知。</span></div>
+      <span>${cfg.tip}</span></div>
     </div>
     <div class="sticky"><button class="btn" data-close="1">完成</button></div>`;
 }

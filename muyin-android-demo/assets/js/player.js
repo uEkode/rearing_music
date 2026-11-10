@@ -53,7 +53,7 @@ function finishPlayback(){
   const ev=S.events.find(x=>x.b===S.target&&x.st==='proc');
   if(ev){ev.st='done';ev.note=ev.note.replace(/。$/,'')+`。干预时长 ${fmt(S.track.dur)}，待复测。`}
   const b=barn(S.target);
-  if(b){b.st='watch';b.tip='干预已完成，等待 10 分钟复测声压后恢复常态'}
+  if(b){b.st='watch';b.tip=MY.ds.copy().doneTip}
   toast('干预已结束 · 事件转为「已处理」');
 }
 

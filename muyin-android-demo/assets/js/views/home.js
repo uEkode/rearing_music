@@ -3,13 +3,14 @@
 'use strict';
 
 const S=MY.S;
-const {STAG}=MY.data;
+const ds=MY.ds;
 const {unreadBadge}=MY.ui;
 
 function viewHome(){
+  const m=ds.metrics(), copy=ds.copy(), farm=ds.farm();
   const show=S.expandAll?S.barns:S.barns.slice(0,3);
   const s=show.map(b=>{
-    const [tn,tc]=STAG[b.st];
+    const [tn,tc]=ds.statusLabel(b.st);
     const warn=b.st==='high', mild=b.st==='mild';
     return `<div class="barn" data-open="${b.id}">
       <div class="r1"><div><div class="nm">${b.nm}</div>
@@ -27,19 +28,19 @@ function viewHome(){
         :`<button class="btn" data-calm="${b.id}">♫ 快捷安抚</button>`}
     </div>`;
   }).join('');
-  return `<div class="hd"><div><h1>圈舍总览</h1><p>南岭牧业 · 一号场区 · 在线${S.barns.filter(b=>b.st!=="offline").length}舍</p></div>
+  return `<div class="hd"><div><h1>圈舍总览</h1><p>${farm.name} · ${farm.area} · 在线${ds.onlineCount()}舍</p></div>
       <div class="iconbtn" data-alert="1">🔔${unreadBadge()?`<span class="badge">${unreadBadge()}</span>`:''}</div></div>
     <div class="stats">
       <div class="stat" data-metric="interv"><div class="k">今日干预次数<span>近7天</span></div>
-        <div class="v">${S.interv}<em>次</em><span class="info" data-info="1">ⓘ</span></div>
-        <div class="spark">${[30,50,40,70,55,85,60].map(h=>`<i style="height:${h}%"></i>`).join('')}</div></div>
+        <div class="v">${m.interv}<em>次</em><span class="info" data-info="1">ⓘ</span></div>
+        <div class="spark">${ds.sparks().interv.map(h=>`<i style="height:${h}%"></i>`).join('')}</div></div>
       <div class="stat" data-metric="db"><div class="k">全场平均分贝<span>近7天</span></div>
-        <div class="v">${S.avgDb}<em>dB</em></div>
-        <div class="spark">${[45,60,50,65,55,75,50].map(h=>`<i style="height:${h}%"></i>`).join('')}</div></div>
+        <div class="v">${m.avgDb}<em>dB</em></div>
+        <div class="spark">${ds.sparks().db.map(h=>`<i style="height:${h}%"></i>`).join('')}</div></div>
     </div>
-    ${S.popInfo?'<div class="pop">统计口径：手动 + 自动 + 定时干预，不含音频试听。</div>':''}
+    ${S.popInfo?`<div class="pop">${copy.statsNote}</div>`:''}
     <div class="sect"><h2>圈舍状态</h2>
-      <span data-expand="1">${S.expandAll?'收起':'查看全部 6 个'}</span></div>
+      <span data-expand="1">${S.expandAll?'收起':'查看全部 '+S.barns.length+' 个'}</span></div>
     ${s}
     <div style="height:8px"></div>`;
 }
