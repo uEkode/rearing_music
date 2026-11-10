@@ -191,7 +191,6 @@
   margin:9px 0 10px;line-height:1.5}
 .ev .act{width:100%;border:1.5px solid var(--green);background:var(--card);color:var(--green);
   border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.ev .act.done{background:var(--green);color:#fff}
 .ev .act.proc{border-color:var(--orange);color:#9A6A22;background:var(--orange-l);font-weight:600}
 .ev .act.done{background:var(--green);color:#fff;border-color:var(--green)}
 .ev .act:disabled{opacity:.75;cursor:default}

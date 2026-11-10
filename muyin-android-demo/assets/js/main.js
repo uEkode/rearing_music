@@ -14,7 +14,7 @@ const initialDemoState=MY.initialDemoState;
 render();
 if(!S.seenNotice){
   S.seenNotice=true;
-  $('sheetPanel').innerHTML=`<div class="close" data-close="1">✕</div>
+  MY.sheets.showSheet(`<div class="close" data-close="1">✕</div>
     <h3>开始前请知悉</h3>
     <p style="margin:0 0 14px;font-size:12px;color:var(--mute)">本工具的使用边界</p>
     <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
@@ -24,8 +24,7 @@ if(!S.seenNotice){
       · 当前分贝、识别和效益数据均为演示数据<br>
       · 当前不接入真实 AI、设备及系统消息推送<br>
       · 出现连续应激或牲畜异常行为，请立即人工介入</div>
-    <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`;
-  $('sheet').classList.add('on');
+    <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);
 }
 
 document.getElementById('resetDemo').addEventListener('click',()=>{
@@ -37,7 +36,7 @@ document.getElementById('resetDemo').addEventListener('click',()=>{
 document.addEventListener('click',()=>setTimeout(saveDemo,0));
 window.addEventListener('pagehide',saveDemo);
 window.demoBack=()=>{
-  if(document.getElementById('sheet').classList.contains('on')){document.getElementById('sheet').classList.remove('on');return true}
+  if($('sheet').classList.contains('on')){MY.sheets.closeSheet();return true}
   if(S.page!=='home'){go('home');return true}
   return false;
 };

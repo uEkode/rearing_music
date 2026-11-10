@@ -1,6 +1,7 @@
 /* 交互分发：整页唯一的点击代理 + 音频库搜索输入。
    所有可交互元素通过 data-* 属性声明行为，这里按属性分派。
-   注意：分支顺序有意义（return 生效），新增分支请追加在合适位置。 */
+   注意：分支顺序有意义（return 生效），新增分支请追加在合适位置。
+   所有事件入口都先校验目标是否存在、状态是否允许，避免重复点击或脏数据导致误动作。 */
 (function (MY) {
 'use strict';
 
@@ -10,7 +11,7 @@ const {$,toast,pushLabel}=MY.ui;
 const {REC,STAGE,LIB}=MY.data;
 const {go,render}=MY.app;
 const {startTimer,stopTimer}=MY.player;
-const {openPushSheet}=MY.sheets;
+const {openPushSheet,showSheet,closeSheet}=MY.sheets;
 
 /* ---------- 交互 ---------- */
 document.addEventListener('click',e=>{
@@ -20,6 +21,7 @@ document.addEventListener('click',e=>{
   if(d.tab){go(d.tab);return}
   if(d.calm){
     const b=barn(d.calm);
+    if(!b)return;
     if(b.st==='offline'){toast(`${b.nm} 声压设备离线，无法下发音频`);return}
     S.target=b.id;
     S.sessionCounted=false;
@@ -31,8 +33,9 @@ document.addEventListener('click',e=>{
     return}
   if(d.open){
     const b=barn(d.open);
+    if(!b)return;
     const evs=S.events.filter(x=>x.b===b.id);
-    $('sheetPanel').innerHTML=`<div class="close" data-close="1">✕</div>
+    showSheet(`<div class="close" data-close="1">✕</div>
       <h3>${b.nm}</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${b.stock} · ${b.desc} · ${b.st==='offline'?'设备离线':'演示设备在线'}</p>
       <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:11px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
@@ -59,15 +62,18 @@ document.addEventListener('click',e=>{
       <div class="sticky">
         <button class="btn" data-calm2="${b.id}">♫ 快捷安抚</button>
         <button class="btn ghost" style="margin-top:9px" data-close="1">关闭</button>
-      </div>`;
-    $('sheet').classList.add('on');return}
-  if(d.close){$('sheet').classList.remove('on');render();return}
-  if(d.calm2){if(barn(d.calm2).st==='offline'){toast('演示设备离线，无法干预');return}$('sheet').classList.remove('on');
-    const b=barn(d.calm2);S.target=b.id;S.sessionCounted=false;S.tpl=b.st==='high'?'sleep':'night';
+      </div>`);
+    return}
+  if(d.close){closeSheet();return}
+  if(d.calm2){
+    const b=barn(d.calm2);
+    if(!b)return;
+    if(b.st==='offline'){toast('演示设备离线，无法干预');return}
+    $('sheet').classList.remove('on');
+    S.target=b.id;S.sessionCounted=false;S.tpl=b.st==='high'?'sleep':'night';
     S.track={nm:REC[S.tpl].track,s:REC[S.tpl].out,pos:0,dur:240};S.playing=false;go('music');
     toast(`已带入 ${b.nm} · ${REC[S.tpl].nm}，点击播放开始干预`);return}
-  if(d.alert){go('events');S.filt='pending';render();
-    if(S.unread){S.unread=0}toast('已切换到「待处理」事件');return}
+  if(d.alert){S.filt='pending';go('events');toast('已切换到「待处理」事件');return}
   if(d.metric){go('events');toast(d.metric==='interv'
     ?'「今日干预次数」明细：手动 5 · 自动 5 · 定时 2':'全场平均分贝 68 dB，较上周下降 4 dB');return}
   if(d.mode){S.mode=d.mode;render();return}
@@ -80,7 +86,8 @@ document.addEventListener('click',e=>{
     S.playing=false;stopTimer();render();
     toast('已暂停 · 事件保持「处理中」');return}
   if(d.play){
-    if(!S.deviceOk||barn(S.target).st==='offline'){toast('声压设备离线，无法下发音频');return}
+    const target=barn(S.target);
+    if(!target||target.st==='offline'){toast('声压设备离线，无法下发音频');return}
     S.playing=!S.playing;
     if(S.playing){
       if(S.track.pos>=S.track.dur)S.track.pos=0;
@@ -89,7 +96,7 @@ document.addEventListener('click',e=>{
       if(ev){ev.st='proc';ev.cnt=true;ev.note=`已播放${S.track.nm}，音量${S.vol}%，持续观察中。`}
       else S.events.unshift({id:'e'+(S.events.length+1),b:S.target,cnt:true,
         tm:'刚刚 · 持续 0 分钟',st:'proc',note:`已播放${S.track.nm}，音量${S.vol}%，持续观察中。`});
-      barn(S.target).st='playing';
+      target.st='playing';
       startTimer();
       toast('模拟干预已开始 · 不控制真实设备');}
     else {stopTimer();toast('已暂停 · 事件保持「处理中」')}
@@ -98,6 +105,7 @@ document.addEventListener('click',e=>{
   if(d.filt){S.filt=d.filt;render();return}
   if(d.recheck){
     const b=barn(d.recheck);
+    if(!b||b.st!=='watch')return;
     b.st='normal';b.db=Math.max(56,b.db-14);
     b.tip='声环境平稳，保持当前音量即可';
     render();
@@ -107,7 +115,9 @@ document.addEventListener('click',e=>{
   if(d.libcat){S.libCat=d.libcat;render();return}
   if(d.tgt){
     const b=barn(d.tgt);
+    if(!b)return;
     if(b.st==='offline'){toast('F区·6号待用舍 声压设备离线，无法作为干预目标');return}
+    stopTimer();
     S.target=b.id;S.sessionCounted=false;S.playing=false;
     S.tpl=b.st==='high'?'sleep':'night';
     S.track={nm:REC[S.tpl].track,s:REC[S.tpl].out,pos:0,dur:240};
@@ -115,25 +125,28 @@ document.addEventListener('click',e=>{
     toast(`目标已切换为 ${b.nm} · ${REC[S.tpl].nm}`);return}
   if(d.done){
     const ev=S.events.find(x=>x.id===d.done);
+    if(!ev||ev.st==='done')return;
     const wasProc=ev.st==='proc';
     if(ev.b===S.target){S.playing=false;stopTimer()}
     ev.st='done';
     ev.note=ev.note.replace(/。$/,'')+`。已由陈志远${wasProc?'确认处理':'标记处理'}，等待复测。`;
     if(!ev.cnt){S.interv++;ev.cnt=true}
     const b=barn(ev.b);
-    b.st='watch';
-    b.tip='干预已执行，等待 10 分钟复测声压后恢复常态';
+    if(b){b.st='watch';b.tip='干预已执行，等待 10 分钟复测声压后恢复常态'}
     render();
     toast('已标记处理 · 首页圈舍状态与干预计数已同步');return}
-  if(d.push){S.push=!S.push;render();
-    toast(S.push?'推送已开启 · 首页铃铛将显示提醒':'推送已关闭 · 角标不再更新');return}
+  if(d.push){
+    S.push=!S.push;
+    t.classList.toggle('on',S.push);
+    toast(S.push?'推送已开启 · 首页铃铛将显示提醒':'推送已关闭 · 角标不再更新');
+    return}
   if(d.mi){
     const map={0:['硬件管理','演示设备列表'],1:['圈舍管理','6个圈舍 · 含存栏与设备绑定'],
       2:['消息推送设置','高频应激与设备离线提醒'],3:['新手短视频教程','3分钟学会使用 · 含大字幕'],
       4:['产品免责边界声明','本工具为辅助参考，不替代兽医诊断']};
-    if(d.mi==='0'){$('sheetPanel').innerHTML=`<div class="close" data-close="1">✕</div>
+    if(d.mi==='0'){showSheet(`<div class="close" data-close="1">✕</div>
       <h3>硬件管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}台演示设备 · ${S.barns.filter(b=>b.st==='offline').length}台离线</p>
-      ${S.barns.map(b=>[b.nm,b.st==='offline'?'离线':'在线']).map((r,i)=>`
+      ${S.barns.map(b=>[b.nm,b.st==='offline'?'离线':'在线']).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
           padding:12px;margin-bottom:8px">
           <div style="width:34px;height:34px;border-radius:9px;background:${r[1]==='在线'?'#EDF3EC':'var(--red-l)'};
@@ -143,9 +156,8 @@ document.addEventListener('click',e=>{
           ${r[1]==='离线'?`<button class="btn sm ghost" style="border-color:var(--red);color:var(--red)"
             data-toast="演示提示：尚未连接真实设备">重连</button>`:''}</div>`).join('')}
       <div class="tip" style="margin-top:6px"><span>!</span><span>离线圈舍在首页仍可见，但「快捷安抚」不可用</span></div>
-      <div class="sticky"><button class="btn" data-close="1">完成</button></div>`;
-      $('sheet').classList.add('on');}
-    else if(d.mi==='1'){$('sheetPanel').innerHTML=`<div class="close" data-close="1">✕</div>
+      <div class="sticky"><button class="btn" data-close="1">完成</button></div>`);}
+    else if(d.mi==='1'){showSheet(`<div class="close" data-close="1">✕</div>
       <h3>圈舍管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">6个圈舍 · 含存栏与设备绑定</p>
       ${S.barns.map(b=>[b.nm,b.stock.replace(/[^0-9]/g,'')||0,b.st==='offline'?'离线':'在线']).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
@@ -155,9 +167,8 @@ document.addEventListener('click',e=>{
           <div style="flex:1"><b style="font-size:13px">${r[0]}</b>
             <div style="font-size:11px;color:var(--mute)">存栏 ${r[1]} 头 · 设备${r[2]}</div></div>
           <div class="sw on"></div></div>`).join('')}
-      <div class="tip" style="margin-top:6px"><span>◖</span><span>关闭授权后，该圈舍将从首页移除</span></div>`;
-      $('sheet').classList.add('on');}
-    else if(d.mi==='4'){$('sheetPanel').innerHTML=`<div class="close" data-close="1">✕</div>
+      <div class="tip" style="margin-top:6px"><span>◖</span><span>关闭授权后，该圈舍将从首页移除</span></div>`);}
+    else if(d.mi==='4'){showSheet(`<div class="close" data-close="1">✕</div>
       <h3>产品免责边界声明</h3>
       <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
         line-height:1.75;color:#7A5A2A;margin-top:12px">
@@ -166,8 +177,7 @@ document.addEventListener('click',e=>{
         · 当前分贝、识别和效益数据均为演示数据<br>
         · 当前不接入真实 AI、设备及系统消息推送<br>
         · 出现连续应激或牲畜异常行为，请立即人工介入</div>
-      <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`;
-      $('sheet').classList.add('on');}
+      <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);}
     else if(d.mi==='2'){openPushSheet();
       return}
     else toast(map[d.mi][0]+'：'+map[d.mi][1]);
@@ -175,19 +185,22 @@ document.addEventListener('click',e=>{
   if(d.pcfg){
     const k=d.pcfg;
     S.pushCfg[k]=!S.pushCfg[k];
-    openPushSheet();
+    t.classList.toggle('on',S.pushCfg[k]);
     toast(S.pushCfg[k]?`已开启「${pushLabel(k)}」提醒`:`已关闭「${pushLabel(k)}」提醒`);
     return}
   if(d.plevel){
     S.pushCfg.level=d.plevel;
-    openPushSheet();
+    document.querySelectorAll('[data-plevel]').forEach(el=>el.classList.toggle('on',el.dataset.plevel===d.plevel));
     toast('提醒强度已更新');
     return}
   if(d.pdnd){
     const c=S.pushCfg;
     const pair=c.dndStart==='22:00'?['23:00','07:00']:c.dndStart==='23:00'?['20:00','06:00']:['22:00','06:00'];
     c.dndStart=pair[0];c.dndEnd=pair[1];
-    openPushSheet();
+    const tp=document.querySelector('.timepick');
+    if(tp){const bs=tp.querySelectorAll('b');
+      if(bs[0])bs[0].textContent=c.dndStart;
+      if(bs[1])bs[1].textContent=c.dndEnd}
     toast(`免打扰时段已设为 ${pair[0]} – ${pair[1]}`);
     return}
   if(d.toast){toast(d.toast);return}

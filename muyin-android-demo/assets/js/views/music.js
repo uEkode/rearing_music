@@ -8,7 +8,8 @@ const {REC,LIB}=MY.data;
 const {fmt,VOL_ICON}=MY.ui;
 
 function viewMusic(){
-  const b=barn(S.target), t=REC[S.tpl], tk=S.track;
+  const cur=barn(S.target);
+  const tk=S.track;
   const segs=[['auto','↻','自动','超阈值自动触发'],['manual','☝','手动','手动选曲干预'],['timer','◷','定时','定时批量播放']];
   let body='';
   if(S.mode==='auto'){
@@ -37,9 +38,8 @@ function viewMusic(){
       <div class="tip" style="margin-top:12px"><span>◖</span><span>定时任务同样计入「今日干预次数」与事件流</span></div>
     </div>`;
   }
-  const cur=barn(S.target);
   return `<div class="hd"><div><h1>音乐干预控制台</h1>
-      <p>${cur.nm} · ${S.playing?'正在干预':'待开始'}</p></div>
+      <p>${cur?cur.nm:'未选择圈舍'} · ${S.playing?'正在干预':'待开始'}</p></div>
       <span class="tag ${S.deviceOk?'t-normal':'t-high'}">● ${S.deviceOk?'设备已连接':'设备离线'}</span></div>
     <div class="tgt"><span class="tg-l">目标圈舍</span>
       ${S.barns.map(b=>`<div class="tg ${S.target===b.id?'on':''} ${b.st==='offline'?'dis':''}" data-tgt="${b.id}">${b.nm.replace('区·','·')}</div>`).join('')}

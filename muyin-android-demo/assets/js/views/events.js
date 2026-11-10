@@ -7,8 +7,7 @@ const {BMAP,STAGE}=MY.data;
 
 function viewEvents(){
   const fl=[['all','全部 '+S.events.length],['pending','待处理'],['proc','处理中'],['done','已处理']];
-  const list=S.events.filter(e=>S.filt==='all'?true:(S.filt==='done'?e.st==='done':e.st===S.filt));
-  const cnt=k=>S.events.filter(e=>e.st===k).length;
+  const list=S.filt==='all'?S.events:S.events.filter(e=>e.st===S.filt);
   return `<div class="hd"><div><h1>事件与数据中心</h1><p>近7日 · 全场汇总</p></div></div>
     <div class="banner" data-alert="1"><b>● 高频应激预警</b>
       <p>C区5号产房今日3次超过 80 dB，已自动干预2次</p></div>

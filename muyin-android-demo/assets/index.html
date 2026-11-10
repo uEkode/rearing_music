@@ -32,67 +32,11 @@
           <span class="sb-batt"><span class="sb-batt-fill"></span></span>
         </span>
       </div>
-      <div class="scroll" id="scroll"><div class="hd"><div><h1>圈舍总览</h1><p>南岭牧业 · 一号场区 · 在线${S.barns.filter(b=>b.st!=="offline").length}舍</p></div>
-      <div class="iconbtn" data-alert="1">🔔<span class="badge">2</span></div></div>
-    <div class="stats">
-      <div class="stat" data-metric="interv"><div class="k">今日干预次数<span>近7天</span></div>
-        <div class="v">12<em>次</em><span class="info" data-info="1">ⓘ</span></div>
-        <div class="spark"><i style="height:30%"></i><i style="height:50%"></i><i style="height:40%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i><i style="height:60%"></i></div></div>
-      <div class="stat" data-metric="db"><div class="k">全场平均分贝<span>近7天</span></div>
-        <div class="v">68<em>dB</em></div>
-        <div class="spark"><i style="height:45%"></i><i style="height:60%"></i><i style="height:50%"></i><i style="height:65%"></i><i style="height:55%"></i><i style="height:75%"></i><i style="height:50%"></i></div></div>
-    </div>
-    
-    <div class="sect"><h2>圈舍状态</h2>
-      <span data-expand="1">查看全部 6 个</span></div>
-    <div class="barn" data-open="A1">
-      <div class="r1"><div><div class="nm">A区·1号育肥舍</div>
-        <div class="sub">存栏128头 · 声压监测中</div></div>
-        <span class="tag t-normal">● 正常</span></div>
-      <div class="dbrow"><b style="color:var(--green)">62</b>
-        <span class="unit">dB</span><i>· 1小时均值</i></div>
-      <div class="tip ok"><span>◖</span><span>声环境平稳，保持当前音量即可</span></div>
-      <button class="btn" data-calm="A1">♫ 快捷安抚</button>
-    </div><div class="barn" data-open="B2">
-      <div class="r1"><div><div class="nm">B区·2号妊娠舍</div>
-        <div class="sub">存栏86头 · 声压波动偏大</div></div>
-        <span class="tag t-mild">● 轻度应激</span></div>
-      <div class="dbrow"><b style="color:var(--orange)">71</b>
-        <span class="unit">dB</span><i>· 1小时均值</i></div>
-      <div class="tip "><span>!</span><span>检测到71dB偏高，建议播放舒缓音乐并降低音量</span></div>
-      <button class="btn" data-calm="B2">♫ 快捷安抚</button>
-    </div><div class="barn" data-open="C5">
-      <div class="r1"><div><div class="nm">C区·5号产房</div>
-        <div class="sub">存栏47头 · 持续高分贝</div></div>
-        <span class="tag t-high">● 高度应激</span></div>
-      <div class="dbrow"><b style="color:var(--red)">83</b>
-        <span class="unit">dB</span><i>· 1小时均值</i></div>
-      <div class="tip warn"><span>!</span><span>已连续3次超过80dB，自动干预2次仍未回落</span></div>
-      <button class="btn" data-calm="C5">♫ 快捷安抚</button>
-    </div>
-    <div style="height:8px"></div></div>
+      <!-- 页面内容全部由 js/views 渲染，这里只留挂载点 -->
+      <div class="scroll" id="scroll"></div>
       <div id="mini"></div>
-      <div class="nav" id="nav"><div class="on" data-tab="home">
-    <span class="gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"></path>
-    <path d="M5.5 9.5V20h13V9.5"></path><path d="M9.5 20v-5.5h5V20"></path></svg></span>首页</div><div class="" data-tab="music">
-    <span class="gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"></path>
-    <circle cx="6.5" cy="18" r="2.6"></circle><circle cx="16.5" cy="16" r="2.6"></circle></svg></span>干预</div><div class="" data-tab="events">
-    <span class="gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path>
-    <rect x="6" y="11" width="3.2" height="6" rx="1"></rect><rect x="11.4" y="7" width="3.2" height="10" rx="1"></rect>
-    <rect x="16.8" y="13.5" width="3.2" height="3.5" rx="1"></rect></svg></span>事件</div><div class="" data-tab="me">
-    <span class="gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.8"></circle>
-    <path d="M4.8 20c.6-3.9 3.6-6.2 7.2-6.2s6.6 2.3 7.2 6.2"></path></svg></span>我的</div></div>
-      <div class="sheet" id="sheet"><div class="panel" id="sheetPanel"><div class="close" data-close="1">✕</div>
-    <h3>开始前请知悉</h3>
-    <p style="margin:0 0 14px;font-size:12px;color:var(--mute)">本工具的使用边界</p>
-    <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
-      line-height:1.75;color:#7A5A2A">
-      本工具输出的分贝值、音乐干预建议与应激判定，<b>仅作为牧场辅助参考</b>，
-      不构成兽医诊断依据，也不替代现场人工观察。<br><br>
-      · 当前分贝、识别和效益数据均为演示数据<br>
-      · 当前不接入真实 AI、设备及系统消息推送<br>
-      · 出现连续应激或牲畜异常行为，请立即人工介入</div>
-    <button class="btn" data-close="1" style="margin-top:14px">我知道了</button></div></div>
+      <div class="nav" id="nav"></div>
+      <div class="sheet" id="sheet"><div class="panel" id="sheetPanel"></div></div>
       <div class="toast" id="toast"></div>
     </div>
   </div>

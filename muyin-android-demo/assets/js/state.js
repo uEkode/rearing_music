@@ -35,7 +35,7 @@ const S={
   expandAll:false, popInfo:false, libQ:'', libCat:'all',
   target:'B2', mode:'manual', tpl:'sleep', playing:false, vol:65,
   track:{nm:'舒眠钢琴曲 · 母牛安眠',s:'环境音 · 60 dB 恒定输出',pos:84,dur:240},
-  deviceOk:true, push:true, unread:3, timer:null,
+  deviceOk:true, push:true,
   pushCfg:{high:true,mild:false,event:true,offline:true,daily:false,
     dnd:false,dndStart:'22:00',dndEnd:'06:00',level:'normal'}
 };

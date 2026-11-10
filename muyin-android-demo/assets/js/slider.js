@@ -28,16 +28,19 @@ function applyVol(el,clientX){
   const sp=document.querySelector('.vspk');
   if(sp)sp.innerHTML=VOL_ICON(S.vol);
   const ev=S.events.find(x=>x.b===S.target&&x.st==='proc');
-  if(ev)ev.note=`已播放${S.track.nm}，音量${S.vol}%，持续观察中。`;
+  // 只有真的在播放时才改事件备注，避免没播放就拖动音量把备注改掉
+  if(ev&&S.playing)ev.note=`已播放${S.track.nm}，音量${S.vol}%，持续观察中。`;
 }
 function applySeek(el,clientX){
   S.track.pos=Math.round(sliderPos(el,clientX)*S.track.dur);
   paintProgress();
   // 拖动时给出即时反馈，明确这是"跳转到"而非"播放中"
   const tip=document.getElementById('seekTip');
-  if(tip){tip.textContent=`跳转到 ${fmt(S.track.pos)}`;tip.classList.add('on')}
-  clearTimeout(tip._h);
-  tip._h=setTimeout(()=>tip.classList.remove('on'),1400);
+  if(tip){
+    tip.textContent=`跳转到 ${fmt(S.track.pos)}`;tip.classList.add('on');
+    clearTimeout(tip._h);
+    tip._h=setTimeout(()=>tip.classList.remove('on'),1400);
+  }
 }
 function onDown(e){
   const el=e.target.closest('[data-vol],[data-seek]');

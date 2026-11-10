@@ -14,7 +14,9 @@ function setTab(p){go(p)}
 
 function render(){
   saveDemo();
-  const v={home:MY.views.home,music:MY.views.music,events:MY.views.events,me:MY.views.me}[S.page]();
+  const views={home:MY.views.home,music:MY.views.music,events:MY.views.events,me:MY.views.me};
+  if(!views[S.page])S.page='home';
+  const v=views[S.page]();
   $('scroll').innerHTML=v;
   $('mini').innerHTML=(S.playing&&S.page!=='music')?`<div class="mini">
       <div class="mi-t"><b>${S.track.nm}</b><small>${S.track.s}</small></div>
