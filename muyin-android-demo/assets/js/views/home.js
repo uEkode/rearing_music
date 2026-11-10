@@ -8,8 +8,9 @@ const {unreadBadge}=MY.ui;
 
 function viewHome(){
   const m=ds.metrics(), copy=ds.copy(), farm=ds.farm();
-  const show=S.expandAll?S.barns:S.barns.slice(0,3);
-  const s=show.map(b=>{
+  /* 只展示已授权圈舍，且全部列出（不再折叠） */
+  const shown=ds.homeBarns();
+  const s=shown.map(b=>{
     const [tn,tc]=ds.barnStatus(b);
     const level=ds.stressLevel(b);
     const warn=level==='high', mild=level==='mild';
@@ -42,7 +43,7 @@ function viewHome(){
     </div>
     ${S.popInfo?`<div class="pop">${copy.statsNote}</div>`:''}
     <div class="sect"><h2>圈舍状态</h2>
-      <button type="button" class="sectlink" data-expand="1">${S.expandAll?'收起':'查看全部 '+S.barns.length+' 个'}</button></div>
+      <span>全部 ${shown.length} 个</span></div>
     ${s}
     <div style="height:8px"></div>`;
 }

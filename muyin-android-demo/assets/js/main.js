@@ -22,9 +22,11 @@ if(!S.seenNotice){
   MY.sheets.showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
     <h3>开始前请知悉</h3>
     <p style="margin:0 0 14px;font-size:12px;color:var(--mute)">本工具的使用边界</p>
+    <div class="pbody">
     <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
       line-height:1.75;color:#7A5A2A">${ds.copy().disclaimer}</div>
-    <button type="button" class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);
+    <button type="button" class="btn" data-close="1" style="margin-top:14px">我知道了</button>
+    </div>`);
 }
 
 document.getElementById('resetDemo').addEventListener('click',()=>{

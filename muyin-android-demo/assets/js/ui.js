@@ -4,25 +4,17 @@
 'use strict';
 
 const S=MY.S;
-const barn=MY.barn;
 const PUSH_LBL=MY.fixtures.push.labels;
 
 const $=id=>document.getElementById(id);
 
 const pushLabel=k=>PUSH_LBL[k]||k;
 
-/* 角标 = 会被推送提醒的事件数（用户关闭了对应提醒的类型不计入） */
+/* 角标 = 待处理事件数（「处理中」算未处理），与事件页「待处理」筛选、
+   铃铛点击后的列表保持一致；关闭推送总开关后归零。 */
 function unreadBadge(){
   if(!S.push)return 0;
-  const p=S.pushCfg;
-  const pending=S.events.filter(e=>e.st==='pending');
-  const proc=S.events.filter(e=>e.st==='proc');
-  let n=0;
-  if(p.high)n+=pending.filter(e=>MY.ds.stressLevel(barn(e.b))==='high').length;
-  if(p.event)n+=proc.filter(e=>barn(e.b).interv==='playing').length;
-  if(p.mild)n+=pending.filter(e=>MY.ds.stressLevel(barn(e.b))==='mild').length;
-  if(p.offline)n+=S.barns.filter(b=>!b.online).length;
-  return n;
+  return S.events.filter(e=>e.st!=='done').length;
 }
 
 const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');

@@ -42,7 +42,7 @@ function viewMusic(){
       <p>${cur?cur.nm:'未选择圈舍'} · ${S.playing?'正在干预':'待开始'}</p></div>
       <span class="tag ${online?'t-normal':'t-high'}">● ${online?'设备已连接':'设备离线'}</span></div>
     <div class="tgt"><span class="tg-l">目标圈舍</span>
-      ${S.barns.map(b=>`<button type="button" class="tg ${S.target===b.id?'on':''} ${!b.online?'dis':''}" data-tgt="${b.id}" aria-pressed="${S.target===b.id}">${b.nm.replace('区·','·')}</button>`).join('')}
+      ${S.barns.filter(b=>b.granted).map(b=>`<button type="button" class="tg ${S.target===b.id?'on':''} ${!b.online?'dis':''}" data-tgt="${b.id}" aria-pressed="${S.target===b.id}">${b.nm.replace('区·','·')}</button>`).join('')}
     </div>
     <div class="seg">${ds.modes().map(s=>`<button type="button" class="segbtn ${S.mode===s[0]?'on':''}" data-mode="${s[0]}" aria-pressed="${S.mode===s[0]}">
       <span class="gi" aria-hidden="true">${s[1]}</span><b>${s[2]}</b><small>${s[3]}</small></button>`).join('')}</div>

@@ -8,7 +8,10 @@ const ds=MY.ds;
 function viewEvents(){
   const m=ds.metrics(), alarm=ds.alarm();
   const fl=ds.eventFilters().map(f=>f[0]==='all'?[f[0],f[1]+' '+S.events.length]:f);
-  const list=S.filt==='all'?S.events:S.events.filter(e=>e.st===S.filt);
+  /* 「处理中」并入待处理：待处理 = 所有未处理事件 */
+  const list=S.filt==='all'?S.events
+    :S.filt==='pending'?S.events.filter(ds.isOpenEvent)
+    :S.events.filter(e=>e.st==='done');
   return `<div class="hd"><div><h1>事件与数据中心</h1><p>近7日 · 全场汇总</p></div></div>
     <button type="button" class="banner" data-alert="1"><b>${alarm.title}</b>
       <p>${alarm.text}</p></button>
@@ -22,7 +25,7 @@ function viewEvents(){
           <b style="display:block;margin:3px 0;font-size:23px;color:var(--orange)">¥ ${m.benefitYuan.toLocaleString('en-US')} <span class="u">元/月</span></b></div>
         <button class="btn sm ghost" style="border-color:var(--orange);color:var(--orange)" data-toast="演示版尚未生成真实报告">⤓ 导出报告</button>
       </div></div>
-    <div class="sect"><h2>实时预警事件</h2><button type="button" class="sectlink" data-toast="筛选与历史在当前页完成，无需跳转">全部 ${S.events.length} 条</button></div>
+    <div class="sect"><h2>实时预警事件</h2><span>全部 ${S.events.length} 条</span></div>
     <div class="chips">${fl.map(f=>`<button type="button" class="chip ${S.filt===f[0]?'on':''}" data-filt="${f[0]}" aria-pressed="${S.filt===f[0]}">${f[1]}</button>`).join('')}</div>
     ${list.length?list.map(e=>{
       const [sn,sc]=ds.eventStatus(e.st);

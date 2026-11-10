@@ -111,10 +111,9 @@ function pushSheetHTML(){
     <div class="grp">免打扰时段</div>
     ${row(cfg.dnd.key,cfg.dnd.ic,cfg.dnd.title,cfg.dnd.desc,p[cfg.dnd.key])}
     <div class="timepick">
-      <div><small>开始</small><b>${p.dndStart}</b></div>
+      <div><small>开始</small><input type="time" class="dndtime" data-dnd="start" value="${p.dndStart}" aria-label="免打扰开始时间"></div>
       <span aria-hidden="true">→</span>
-      <div><small>结束</small><b>${p.dndEnd}</b></div>
-      <button type="button" class="btn sm ghost" data-pdnd="1">调整</button>
+      <div><small>结束</small><input type="time" class="dndtime" data-dnd="end" value="${p.dndEnd}" aria-label="免打扰结束时间"></div>
     </div>
 
     <div class="grp">提醒强度</div>

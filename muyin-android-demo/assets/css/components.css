@@ -231,6 +231,10 @@
 .timepick div{flex:1;text-align:center}
 .timepick small{font-size:10.5px;color:var(--mute);display:block}
 .timepick b{font-size:17px;font-weight:700;color:var(--green)}
+/* 免打扰时段用原生时间选择器，外观与原来的文字保持一致 */
+.timepick input.dndtime{font:inherit;font-size:17px;font-weight:700;color:var(--green);
+  background:none;border:0;padding:0;width:100%;text-align:center;font-family:inherit;
+  -webkit-appearance:none;appearance:none}
 .timepick span{color:var(--mute);font-size:13px}
 .timepick .btn{flex:none;margin-top:0}
 
@@ -239,11 +243,15 @@
 .sheet.on{opacity:1;pointer-events:auto}
 .sheet .panel{background:var(--bg);width:100%;border-radius:22px 22px 0 0;padding:20px 18px 26px;
   transform:translateY(100%);transition:.3s cubic-bezier(.32,.72,0,1);max-height:84%;
-  overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;isolation:isolate}
+  overflow:hidden;overscroll-behavior:contain;display:flex;flex-direction:column;isolation:isolate}
 .sheet.on .panel{transform:translateY(0)}
 .sheet h3{margin:0 0 3px;font-size:17px;font-weight:700}
-.sheet .pbody{flex:1 1 auto;min-height:0}
-.sheet .sticky{flex:none;padding-top:14px;margin-top:10px;background:var(--bg);position:relative;z-index:2}
+/* 弹层内容区独立滚动，底部按钮留在面板里不动 */
+.sheet .pbody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  margin:0 -18px;padding:0 18px}
+/* 底部按钮常驻面板底部（面板不滚动，只有内容区滚动） */
+.sheet .sticky{flex:none;padding-top:14px;margin-top:10px;background:var(--bg);
+  position:relative;z-index:2}
 .sheet .sticky::before{content:"";position:absolute;left:-18px;right:-18px;top:-18px;height:18px;
   background:var(--bg);pointer-events:none;z-index:-2;
   -webkit-mask-image:linear-gradient(to bottom,transparent,#000);

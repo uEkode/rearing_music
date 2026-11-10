@@ -14,7 +14,7 @@ const S={
   barns:JSON.parse(JSON.stringify(F.barns)),
   events:JSON.parse(JSON.stringify(F.events)),
   interv:F.metrics.interv, filt:'all', sessionCounted:false,
-  popInfo:false, expandAll:false, libQ:'', libCat:'all',
+  popInfo:false, libQ:'', libCat:'all',
   target:'B2', mode:'manual', tpl:'sleep', playing:false, vol:65,
   track:{nm:F.templates.sleep.track,s:F.templates.sleep.out,pos:84,dur:240},
   push:true,

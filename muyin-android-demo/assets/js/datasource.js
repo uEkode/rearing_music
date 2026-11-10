@@ -24,7 +24,9 @@ const ds={
     };
   },
   sparks:()=>F.sparks,
-  onlineCount:()=>S.barns.filter(b=>b.online).length,
+  /* 首页只展示「已授权且未移除」的圈舍 */
+  homeBarns:()=>S.barns.filter(b=>b.granted),
+  onlineCount:()=>S.barns.filter(b=>b.granted&&b.online).length,
 
   /* 圈舍 */
   barns:()=>S.barns,
@@ -42,10 +44,12 @@ const ds={
   barnFacts:id=>F.barnFacts[id]||{todayInterv:0,peakDb:0,device:{battery:'—',offlineAt:''}},
   curve24h:()=>F.barnCurve24h,
 
-  /* 事件 */
+  /* 事件：「处理中」并入待处理，未处理即 st!=='done' */
   events:()=>S.events,
   eventFilters:()=>F.eventFilters,
   eventStatus:st=>F.eventStatusLabels[st],
+  isOpenEvent:e=>e.st!=='done',
+  openEventCount:()=>S.events.filter(e=>e.st!=='done').length,
   alarm:()=>F.alarm,
 
   /* 干预 */

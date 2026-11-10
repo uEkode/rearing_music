@@ -131,11 +131,12 @@ F.templates={
   guide:{nm:'录音引导',desc:'04:00',track:'牧场景声 · 录音引导',out:'实况环境音 · 48 dB 柔和输出',g:'▤'}
 };
 
-/* ---------- 事件状态与筛选 ---------- */
+/* ---------- 事件状态与筛选 ----------
+   「处理中」算未处理，所以筛选只有 全部 / 待处理 / 已处理 三类 */
 F.eventStatusLabels={
   pending:['待处理','t-high'],proc:['处理中','t-mild'],done:['已处理','t-normal']
 };
-F.eventFilters=[['all','全部'],['pending','待处理'],['proc','处理中'],['done','已处理']];
+F.eventFilters=[['all','全部'],['pending','待处理'],['done','已处理']];
 
 /* ---------- 消息推送设置 ---------- */
 F.push={

@@ -15,7 +15,7 @@ const {openPushSheet,showSheet,closeSheet}=MY.sheets;
 
 /* ---------- 交互 ---------- */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab],[data-calm],[data-open],[data-alert],[data-metric],[data-mode],[data-tpl],[data-play],[data-lib],[data-filt],[data-done],[data-mi],[data-push],[data-toast],[data-recheck],[data-close],[data-calm2],[data-tgt],[data-expand],[data-info],[data-libcat],[data-pcfg],[data-plevel],[data-pdnd],[data-miniplay]');
+  const t=e.target.closest('[data-tab],[data-calm],[data-open],[data-alert],[data-metric],[data-mode],[data-tpl],[data-play],[data-lib],[data-filt],[data-done],[data-mi],[data-push],[data-toast],[data-recheck],[data-close],[data-calm2],[data-tgt],[data-grant],[data-info],[data-libcat],[data-pcfg],[data-plevel],[data-miniplay]');
   if(!t)return;
   const d=t.dataset;
   if(d.tab){go(d.tab);return}
@@ -39,6 +39,7 @@ document.addEventListener('click',e=>{
     const evs=S.events.filter(x=>x.b===b.id);
     showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>${b.nm}</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${b.stock} · ${b.desc} · ${ds.barnOnline(b)?'演示设备在线':'设备离线'}</p>
+      <div class="pbody">
       <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:11px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
           <b style="font-size:13px;color:var(--green)">24小时声压曲线</b>
@@ -60,6 +61,7 @@ document.addEventListener('click',e=>{
           padding:9px 0;border-bottom:1px solid var(--line);font-size:12px">
           <span>${e.tm}</span><span class="tag ${ds.eventStatus(e.st)[1]}">● ${ds.eventStatus(e.st)[0]}</span></div>`).join('')
           :'<div style="font-size:12px;color:var(--mute);padding:10px 0">近7日无事件</div>'}
+      </div>
       </div>
       <div class="sticky">
         <button type="button" class="btn" data-calm2="${b.id}">♫ 快捷安抚</button>
@@ -92,7 +94,10 @@ document.addEventListener('click',e=>{
     S.playing=false;render();
     toast(`已套用「${tpl.nm}」，点击播放开始`);return}
   if(d.miniplay){
-    S.playing=false;stopTimer();render();
+    S.playing=false;stopTimer();
+    const cur=barn(S.target);
+    if(cur)cur.interv=null;
+    render();
     toast('已暂停 · 事件保持「处理中」');return}
   if(d.play){
     const target=barn(S.target);
@@ -108,7 +113,7 @@ document.addEventListener('click',e=>{
       target.interv='playing';
       startTimer();
       toast('模拟干预已开始 · 不控制真实设备');}
-    else {stopTimer();toast('已暂停 · 事件保持「处理中」')}
+    else {stopTimer();target.interv=null;toast('已暂停 · 事件保持「处理中」')}
     render();return}
   if(d.lib){toast('模拟试听 · 本版不播放真实音频');return}
   if(d.filt){S.filt=d.filt;render();return}
@@ -119,7 +124,6 @@ document.addEventListener('click',e=>{
     b.tip='声环境平稳，保持当前音量即可';
     render();
     toast(`${b.nm} 模拟复测通过 · 已恢复「正常」`);return}
-  if(d.expand){S.expandAll=!S.expandAll;render();return}
   if(d.info){e.stopPropagation();S.popInfo=!S.popInfo;render();return}
   if(d.libcat){S.libCat=d.libcat;render();return}
   if(d.tgt){
@@ -155,6 +159,7 @@ document.addEventListener('click',e=>{
     const copy=ds.copy();
     if(d.mi==='hardware'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>硬件管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}台演示设备 · ${S.barns.filter(b=>!b.online).length}台离线</p>
+      <div class="pbody">
       ${S.barns.map(b=>[b,!b.online?'离线':'在线',ds.barnFacts(b.id)]).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
           padding:12px;margin-bottom:8px">
@@ -165,29 +170,43 @@ document.addEventListener('click',e=>{
           ${r[1]==='离线'?`<button type="button" class="btn sm ghost" style="border-color:var(--red);color:var(--red)"
             data-toast="演示提示：尚未连接真实设备">重连</button>`:''}</div>`).join('')}
       <div class="tip" style="margin-top:6px"><span>!</span><span>${copy.hardwareTip}</span></div>
+      </div>
       <div class="sticky"><button type="button" class="btn" data-close="1">完成</button></div>`);}
     else if(d.mi==='barns'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>圈舍管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}个圈舍 · 含存栏与设备绑定</p>
-      ${S.barns.map(b=>[b.nm,b.stock.replace(/[^0-9]/g,'')||0,ds.barnOnline(b)?'在线':'离线']).map(r=>`
+      <div class="pbody">
+      ${S.barns.map(b=>[b,b.stock.replace(/[^0-9]/g,'')||0,ds.barnOnline(b)?'在线':'离线']).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
           padding:12px;margin-bottom:8px">
           <div style="width:34px;height:34px;border-radius:9px;background:var(--sub);display:grid;
             place-items:center;font-size:14px">⌂</div>
-          <div style="flex:1"><b style="font-size:13px">${r[0]}</b>
+          <div style="flex:1"><b style="font-size:13px">${r[0].nm}</b>
             <div style="font-size:11px;color:var(--mute)">存栏 ${r[1]} 头 · 设备${r[2]}</div></div>
-          <div class="sw on"></div></div>`).join('')}
-      <div class="tip" style="margin-top:6px"><span>◖</span><span>${copy.barnManageTip}</span></div>`);}
+          <button type="button" class="sw ${r[0].granted?'on':''}" role="switch"
+            aria-checked="${!!r[0].granted}" aria-label="${r[0].nm} 授权" data-grant="${r[0].id}"></button></div>`).join('')}
+      <div class="tip" style="margin-top:6px"><span>◖</span><span>${copy.barnManageTip}</span></div>
+      </div>`);}
     else if(d.mi==='legal'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>产品免责边界声明</h3>
+      <div class="pbody">
       <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
         line-height:1.75;color:#7A5A2A;margin-top:12px">${copy.disclaimer}</div>
-      <button type="button" class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);}
+      <button type="button" class="btn" data-close="1" style="margin-top:14px">我知道了</button>
+      </div>`);}
     else if(d.mi==='push'){openPushSheet();
       return}
     else {
       const item=ds.meItems().find(x=>x.key===d.mi);
       toast(item?`${item.title}：${item.desc}`:'该功能尚未实现');
     }
+    return}
+  if(d.grant){
+    const b=barn(d.grant);
+    if(!b)return;
+    b.granted=!b.granted;
+    t.classList.toggle('on',b.granted);
+    t.setAttribute('aria-checked',String(b.granted));
+    toast(b.granted?`已授权 ${b.nm}`:`已关闭 ${b.nm} 的授权，首页将不再显示`);
     return}
   if(d.pcfg){
     const k=d.pcfg;
@@ -205,16 +224,6 @@ document.addEventListener('click',e=>{
     });
     toast('提醒强度已更新');
     return}
-  if(d.pdnd){
-    const c=S.pushCfg;
-    const pair=c.dndStart==='22:00'?['23:00','07:00']:c.dndStart==='23:00'?['20:00','06:00']:['22:00','06:00'];
-    c.dndStart=pair[0];c.dndEnd=pair[1];
-    const tp=document.querySelector('.timepick');
-    if(tp){const bs=tp.querySelectorAll('b');
-      if(bs[0])bs[0].textContent=c.dndStart;
-      if(bs[1])bs[1].textContent=c.dndEnd}
-    toast(`免打扰时段已设为 ${pair[0]} – ${pair[1]}`);
-    return}
   if(d.toast){toast(d.toast);return}
 });
 
@@ -226,6 +235,15 @@ document.addEventListener('keydown',e=>{
   if(!el||el.getAttribute('role')!=='button')return;
   e.preventDefault();
   el.click();
+});
+
+/* 免打扰时段：时间选择器直接改，改完即生效 */
+document.addEventListener('change',e=>{
+  const el=e.target;
+  if(!el||!el.dataset||!el.dataset.dnd)return;
+  if(el.dataset.dnd==='start')S.pushCfg.dndStart=el.value||S.pushCfg.dndStart;
+  else S.pushCfg.dndEnd=el.value||S.pushCfg.dndEnd;
+  toast(`免打扰时段 ${S.pushCfg.dndStart} – ${S.pushCfg.dndEnd}`);
 });
 
 /* 音频库搜索：局部更新，不重渲染整页以保留输入焦点 */
