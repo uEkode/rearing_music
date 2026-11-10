@@ -1,0 +1,11 @@
+/* 设计令牌：颜色、语义色。
+   所有组件的颜色都从这里取值，改主题只改这一个文件。 */
+:root{
+  --green:#33503E; --green-d:#2A4234; --green-l:#5C7065;
+  --orange:#C88B3D; --orange-l:#FDF6EA;
+  --red:#C0483F; --red-l:#FBEEEC;
+  --amber:#C88B3D; --amber-l:#FDF4E8;
+  --blue:#3F6E8C; --blue-l:#EDF3F8;
+  --bg:#FAF9F5; --card:#FFFFFF; --sub:#F1F2ED;
+  --ink:#2C2C2A; --mute:#7A7F79; --line:rgba(0,0,0,.07);
+}

@@ -1,0 +1,22 @@
+/* 安卓 WebView 适配：铺满真实屏幕、安全区、触控热区。
+   桌面浏览器预览时这些规则基本不生效（宽度 <600px 时生效一部分）。 */
+html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+body{padding:0;min-height:0;display:block;background:var(--bg)}
+.wrap{width:100%;height:100%}
+.phone{width:100%;height:100%;border-radius:0;box-shadow:none}
+.statusbar{display:none}
+.screen{padding-top:0}
+.demo-strip{flex:none;background:#E8EFE8;color:#33503E;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;border-bottom:1px solid #D5DFD4}
+.demo-strip button{border:1px solid #789180;border-radius:7px;background:white;color:#33503E;padding:5px 9px;min-height:44px;font-size:12px;line-height:normal}
+.scroll{padding-top:12px;min-height:0;overscroll-behavior:contain}
+.nav{height:70px;padding-bottom:8px}
+.nav>.navbtn{min-height:48px}
+.btn,.act,.chip,.tg{min-height:44px}
+.tg{display:inline-flex;align-items:center;justify-content:center}
+.iconbtn{width:44px;height:44px}
+.sheet .close{width:44px;height:44px;right:8px;top:6px;display:grid;place-items:center}
+.sheet .panel{max-height:90%;overflow-y:auto}
+.sheet h3{padding-right:42px}
+.demo-footnote{font-size:12px;color:var(--mute);padding:12px 2px;line-height:1.6}
+@media(min-width:600px){body{display:flex;justify-content:center}.wrap{max-width:520px;border-inline:1px solid var(--line)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
