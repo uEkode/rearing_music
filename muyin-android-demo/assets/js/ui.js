@@ -18,10 +18,10 @@ function unreadBadge(){
   const pending=S.events.filter(e=>e.st==='pending');
   const proc=S.events.filter(e=>e.st==='proc');
   let n=0;
-  if(p.high)n+=pending.filter(e=>barn(e.b).st==='high').length;
-  if(p.event)n+=proc.filter(e=>barn(e.b).st==='playing').length;
-  if(p.mild)n+=pending.filter(e=>barn(e.b).st==='mild').length;
-  if(p.offline)n+=S.barns.filter(b=>b.st==='offline').length;
+  if(p.high)n+=pending.filter(e=>MY.ds.stressLevel(barn(e.b))==='high').length;
+  if(p.event)n+=proc.filter(e=>barn(e.b).interv==='playing').length;
+  if(p.mild)n+=pending.filter(e=>MY.ds.stressLevel(barn(e.b))==='mild').length;
+  if(p.offline)n+=S.barns.filter(b=>!b.online).length;
   return n;
 }
 

@@ -22,10 +22,10 @@ document.addEventListener('click',e=>{
   if(d.calm){
     const b=barn(d.calm);
     if(!b)return;
-    if(b.st==='offline'){toast(`${b.nm} 声压设备离线，无法下发音频`);return}
+    if(!b.online){toast(`${b.nm} 声压设备离线，无法下发音频`);return}
     S.target=b.id;
     S.sessionCounted=false;
-    S.tpl=b.st==='high'?'sleep':'night';
+    S.tpl=ds.stressLevel(b)==='high'?'sleep':'night';
     const tpl=ds.templates()[S.tpl];
     S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};
     S.playing=false;
@@ -62,17 +62,17 @@ document.addEventListener('click',e=>{
           :'<div style="font-size:12px;color:var(--mute);padding:10px 0">近7日无事件</div>'}
       </div>
       <div class="sticky">
-        <button class="btn" data-calm2="${b.id}">♫ 快捷安抚</button>
-        <button class="btn ghost" style="margin-top:9px" data-close="1">关闭</button>
+        <button type="button" class="btn" data-calm2="${b.id}">♫ 快捷安抚</button>
+        <button type="button" class="btn ghost" style="margin-top:9px" data-close="1">关闭</button>
       </div>`);
     return}
   if(d.close){closeSheet();return}
   if(d.calm2){
     const b=barn(d.calm2);
     if(!b)return;
-    if(b.st==='offline'){toast('演示设备离线，无法干预');return}
+    if(!b.online){toast('演示设备离线，无法干预');return}
     $('sheet').classList.remove('on');
-    S.target=b.id;S.sessionCounted=false;S.tpl=b.st==='high'?'sleep':'night';
+    S.target=b.id;S.sessionCounted=false;S.tpl=ds.stressLevel(b)==='high'?'sleep':'night';
     const tpl=ds.templates()[S.tpl];
     S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};S.playing=false;go('music');
     toast(`已带入 ${b.nm} · ${tpl.nm}，点击播放开始干预`);return}
@@ -96,7 +96,7 @@ document.addEventListener('click',e=>{
     toast('已暂停 · 事件保持「处理中」');return}
   if(d.play){
     const target=barn(S.target);
-    if(!target||target.st==='offline'){toast('声压设备离线，无法下发音频');return}
+    if(!target||!target.online){toast('声压设备离线，无法下发音频');return}
     S.playing=!S.playing;
     if(S.playing){
       if(S.track.pos>=S.track.dur)S.track.pos=0;
@@ -105,7 +105,7 @@ document.addEventListener('click',e=>{
       if(ev){ev.st='proc';ev.cnt=true;ev.note=`已播放${S.track.nm}，音量${S.vol}%，持续观察中。`}
       else S.events.unshift({id:'e'+(S.events.length+1),b:S.target,cnt:true,
         tm:'刚刚 · 持续 0 分钟',st:'proc',note:`已播放${S.track.nm}，音量${S.vol}%，持续观察中。`});
-      target.st='playing';
+      target.interv='playing';
       startTimer();
       toast('模拟干预已开始 · 不控制真实设备');}
     else {stopTimer();toast('已暂停 · 事件保持「处理中」')}
@@ -114,8 +114,8 @@ document.addEventListener('click',e=>{
   if(d.filt){S.filt=d.filt;render();return}
   if(d.recheck){
     const b=barn(d.recheck);
-    if(!b||b.st!=='watch')return;
-    b.st='normal';b.db=Math.max(56,b.db-14);
+    if(!b||b.interv!=='watch')return;
+    b.interv=null;b.db=Math.max(56,b.db-14);
     b.tip='声环境平稳，保持当前音量即可';
     render();
     toast(`${b.nm} 模拟复测通过 · 已恢复「正常」`);return}
@@ -125,10 +125,10 @@ document.addEventListener('click',e=>{
   if(d.tgt){
     const b=barn(d.tgt);
     if(!b)return;
-    if(b.st==='offline'){toast(`${b.nm} 声压设备离线，无法作为干预目标`);return}
+    if(!b.online){toast(`${b.nm} 声压设备离线，无法作为干预目标`);return}
     stopTimer();
     S.target=b.id;S.sessionCounted=false;S.playing=false;
-    S.tpl=b.st==='high'?'sleep':'night';
+    S.tpl=ds.stressLevel(b)==='high'?'sleep':'night';
     const tpl=ds.templates()[S.tpl];
     S.track={nm:tpl.track,s:tpl.out,pos:0,dur:240};
     render();
@@ -142,7 +142,7 @@ document.addEventListener('click',e=>{
     ev.note=ev.note.replace(/。$/,'')+`。已由${ds.user().name}${wasProc?'确认处理':'标记处理'}，等待复测。`;
     if(!ev.cnt){S.interv++;ev.cnt=true}
     const b=barn(ev.b);
-    if(b){b.st='watch';b.tip=ds.copy().watchTip}
+    if(b){b.interv='watch';b.tip=ds.copy().watchTip}
     render();
     toast('已标记处理 · 首页圈舍状态与干预计数已同步');return}
   if(d.push){
@@ -154,18 +154,18 @@ document.addEventListener('click',e=>{
   if(d.mi){
     const copy=ds.copy();
     if(d.mi==='hardware'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
-      <h3>硬件管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}台演示设备 · ${S.barns.filter(b=>b.st==='offline').length}台离线</p>
-      ${S.barns.map(b=>[b,b.st==='offline'?'离线':'在线',ds.barnFacts(b.id)]).map(r=>`
+      <h3>硬件管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}台演示设备 · ${S.barns.filter(b=>!b.online).length}台离线</p>
+      ${S.barns.map(b=>[b,!b.online?'离线':'在线',ds.barnFacts(b.id)]).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
           padding:12px;margin-bottom:8px">
           <div style="width:34px;height:34px;border-radius:9px;background:${r[1]==='在线'?'#EDF3EC':'var(--red-l)'};
             display:grid;place-items:center;font-size:14px;color:${r[1]==='在线'?'#3E6B4A':'var(--red)'}">▤</div>
           <div style="flex:1"><b style="font-size:13px">${r[0].nm}</b>
             <div style="font-size:11px;color:var(--mute)">声压传感器 · ${r[1]==='在线'?'电量 '+r[2].device.battery:r[2].device.offlineAt+' 断开'}</div></div>
-          ${r[1]==='离线'?`<button class="btn sm ghost" style="border-color:var(--red);color:var(--red)"
+          ${r[1]==='离线'?`<button type="button" class="btn sm ghost" style="border-color:var(--red);color:var(--red)"
             data-toast="演示提示：尚未连接真实设备">重连</button>`:''}</div>`).join('')}
       <div class="tip" style="margin-top:6px"><span>!</span><span>${copy.hardwareTip}</span></div>
-      <div class="sticky"><button class="btn" data-close="1">完成</button></div>`);}
+      <div class="sticky"><button type="button" class="btn" data-close="1">完成</button></div>`);}
     else if(d.mi==='barns'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>圈舍管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}个圈舍 · 含存栏与设备绑定</p>
       ${S.barns.map(b=>[b.nm,b.stock.replace(/[^0-9]/g,'')||0,ds.barnOnline(b)?'在线':'离线']).map(r=>`
@@ -181,7 +181,7 @@ document.addEventListener('click',e=>{
       <h3>产品免责边界声明</h3>
       <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
         line-height:1.75;color:#7A5A2A;margin-top:12px">${copy.disclaimer}</div>
-      <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);}
+      <button type="button" class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);}
     else if(d.mi==='push'){openPushSheet();
       return}
     else {
@@ -239,9 +239,9 @@ document.addEventListener('input',e=>{
     const okC=(S.libCat||'all')==='all'||a[4]===S.libCat;
     return okQ&&okC;
   }).map(a=>`
-    <div class="lib" data-lib="${a[0]}"><div class="ic ${a[3]}">${a[2]}</div>
+    <button type="button" class="lib" data-lib="${a[0]}"><div class="ic ${a[3]}" aria-hidden="true">${a[2]}</div>
       <div><b>${a[0]}</b><small>${a[1]}</small></div>
-      <div class="try">▷ 试听</div></div>`).join('')
+      <div class="try">▷ 试听</div></button>`).join('')
     ||`<div style="text-align:center;padding:26px 0;color:var(--mute);font-size:13px">没有匹配的音频</div>`;
   holder.innerHTML=html;
 });

@@ -1,6 +1,8 @@
 /* 演示数据（测试数据）。
    这里是唯一写死业务数据的地方：场区、账号、圈舍、事件、指标、样例曲线、
    规则与任务清单、音频库、推送设置文案、免责与提示文案。
+   圈舍只存客观量（分贝、是否在线、是否授权、干预状态），应激等级由 js/stress.js
+   按阈值推导，将来换成 AI 输出的等级即可，不需要改数据结构和视图。
    接入真实后端时不需要改视图，替换 js/datasource.js 即可。 */
 (function (MY) {
 'use strict';
@@ -16,20 +18,40 @@ F.app={
 F.farm={name:'南岭牧业',area:'一号场区'};
 F.user={name:'陈志远',role:'牧场场长'};
 
-/* ---------- 圈舍（可变状态，state.js 从这里拷贝一份） ---------- */
+/* ---------- 应激分级：阈值与标签 ----------
+   接入真实 AI 后由模型直接给出等级，stress.js 只负责归一化与兜底。 */
+F.stress={
+  levels:[
+    {key:'normal',min:0,max:70},
+    {key:'mild',min:70,max:80},
+    {key:'high',min:80,max:1000}
+  ],
+  labels:{
+    normal:['正常','t-normal'],
+    mild:['轻度应激','t-mild'],
+    high:['高度应激','t-high'],
+    offline:['设备离线','t-offline'],
+    playing:['干预中','t-play'],
+    watch:['恢复观察','t-watch']
+  }
+};
+
+/* ---------- 圈舍（可变状态，state.js 从这里拷贝一份） ----------
+   db 当前分贝；online 设备是否在线；granted 是否授权可见；
+   interv 干预状态：null / 'playing' / 'watch' */
 F.barns=[
-  {id:'A1',nm:'A区·1号育肥舍',stock:'存栏128头',desc:'声压监测中',db:62,st:'normal',
-   tip:'声环境平稳，保持当前音量即可',tago:'正常'},
-  {id:'B2',nm:'B区·2号妊娠舍',stock:'存栏86头',desc:'声压波动偏大',db:71,st:'mild',
-   tip:'检测到71dB偏高，建议播放舒缓音乐并降低音量',tago:'轻度应激'},
-  {id:'C5',nm:'C区·5号产房',stock:'存栏47头',desc:'持续高分贝',db:83,st:'high',
-   tip:'已连续3次超过80dB，自动干预2次仍未回落',tago:'高度应激'},
-  {id:'D3',nm:'D区·3号育肥舍',stock:'存栏64头',desc:'声压监测中',db:65,st:'normal',
-   tip:'声环境平稳，保持当前音量即可',tago:'正常'},
-  {id:'E4',nm:'E区·4号育肥舍',stock:'存栏72头',desc:'声压监测中',db:68,st:'normal',
-   tip:'声环境平稳，保持当前音量即可',tago:'正常'},
-  {id:'F6',nm:'F区·6号待用舍',stock:'暂未存栏',desc:'设备离线',db:0,st:'offline',
-   tip:'声压设备离线，数据暂不可用',tago:'设备离线'}
+  {id:'A1',nm:'A区·1号育肥舍',stock:'存栏128头',desc:'声压监测中',db:62,
+   online:true,granted:true,interv:null,tip:'声环境平稳，保持当前音量即可'},
+  {id:'B2',nm:'B区·2号妊娠舍',stock:'存栏86头',desc:'声压波动偏大',db:71,
+   online:true,granted:true,interv:null,tip:'检测到71dB偏高，建议播放舒缓音乐并降低音量'},
+  {id:'C5',nm:'C区·5号产房',stock:'存栏47头',desc:'持续高分贝',db:83,
+   online:true,granted:true,interv:null,tip:'已连续3次超过80dB，自动干预2次仍未回落'},
+  {id:'D3',nm:'D区·3号育肥舍',stock:'存栏64头',desc:'声压监测中',db:65,
+   online:true,granted:true,interv:null,tip:'声环境平稳，保持当前音量即可'},
+  {id:'E4',nm:'E区·4号育肥舍',stock:'存栏72头',desc:'声压监测中',db:68,
+   online:true,granted:true,interv:null,tip:'声环境平稳，保持当前音量即可'},
+  {id:'F6',nm:'F区·6号待用舍',stock:'暂未存栏',desc:'设备离线',db:0,
+   online:false,granted:true,interv:null,tip:'声压设备离线，数据暂不可用'}
 ];
 
 /* ---------- 圈舍详情用的演示事实（不参与存档，避免污染可变状态） ---------- */
@@ -42,7 +64,8 @@ F.barnFacts={
   F6:{todayInterv:0,peakDb:4,device:{battery:'—',offlineAt:'10:24'}}
 };
 
-/* ---------- 事件（可变状态） ---------- */
+/* ---------- 事件（可变状态） ----------
+   st：pending 待处理 / proc 处理中（两者都算未处理）/ done 已处理 */
 F.events=[
   {id:'e1',b:'C5',tm:'今天 10:24 · 持续 6 分钟',st:'pending',cnt:false,
    note:'已播放舒眠钢琴曲，等待 10 分钟后复测。'},
@@ -54,9 +77,10 @@ F.events=[
    note:'已由陈志远标记处理，等待复测。'}
 ];
 
-/* ---------- 首页指标 ---------- */
+/* ---------- 首页指标 ----------
+   平均分贝由当前在线圈舍实时算出（见 datasource.metrics），不在这里写死 */
 F.metrics={
-  interv:12, avgDb:68,
+  interv:12,
   weekEvents:26, weekTrend:'↓ 12%', avgIntervMin:4.2, benefitYuan:3860
 };
 F.sparks={
@@ -107,11 +131,7 @@ F.templates={
   guide:{nm:'录音引导',desc:'04:00',track:'牧场景声 · 录音引导',out:'实况环境音 · 48 dB 柔和输出',g:'▤'}
 };
 
-/* ---------- 状态标签 ---------- */
-F.statusLabels={
-  normal:['正常','t-normal'],mild:['轻度应激','t-mild'],high:['高度应激','t-high'],
-  playing:['干预中','t-play'],watch:['恢复观察','t-watch'],offline:['设备离线','t-offline']
-};
+/* ---------- 事件状态与筛选 ---------- */
 F.eventStatusLabels={
   pending:['待处理','t-high'],proc:['处理中','t-mild'],done:['已处理','t-normal']
 };

@@ -10,20 +10,21 @@ function viewHome(){
   const m=ds.metrics(), copy=ds.copy(), farm=ds.farm();
   const show=S.expandAll?S.barns:S.barns.slice(0,3);
   const s=show.map(b=>{
-    const [tn,tc]=ds.statusLabel(b.st);
-    const warn=b.st==='high', mild=b.st==='mild';
+    const [tn,tc]=ds.barnStatus(b);
+    const level=ds.stressLevel(b);
+    const warn=level==='high', mild=level==='mild';
     return `<div class="barn" data-open="${b.id}" role="button" tabindex="0" aria-label="查看 ${b.nm} 详情">
       <div class="r1"><div><div class="nm">${b.nm}</div>
         <div class="sub">${b.stock} · ${b.desc}</div></div>
         <span class="tag ${tc}">● ${tn}</span></div>
-      <div class="dbrow"><b style="color:${warn?'var(--red)':mild?'var(--orange)':b.st==='offline'?'#B9BEB8':'var(--green)'}">${b.db}</b>
+      <div class="dbrow"><b style="color:${warn?'var(--red)':mild?'var(--orange)':!b.online?'#B9BEB8':'var(--green)'}">${b.db}</b>
         <span class="unit">dB</span><i>· 1小时均值</i></div>
       <div class="tip ${warn?'warn':mild?'':'ok'}"><span>${warn||mild?'!':'◖'}</span><span>${b.tip}</span></div>
-      ${b.st==='watch'
+      ${b.interv==='watch'
         ?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
             <button type="button" class="btn ghost" data-recheck="${b.id}">✓ 复测通过</button>
             <button type="button" class="btn" data-calm="${b.id}">♫ 再次安抚</button></div>`
-        :b.st==='offline'
+        :!b.online
         ?`<button type="button" class="btn ghost" style="border-color:#D9DCD6;color:#9AA09A;cursor:default" disabled>设备离线 · 不可干预</button>`
         :`<button type="button" class="btn" data-calm="${b.id}">♫ 快捷安抚</button>`}
     </div>`;

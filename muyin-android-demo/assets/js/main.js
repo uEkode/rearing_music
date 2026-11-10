@@ -24,7 +24,7 @@ if(!S.seenNotice){
     <p style="margin:0 0 14px;font-size:12px;color:var(--mute)">本工具的使用边界</p>
     <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
       line-height:1.75;color:#7A5A2A">${ds.copy().disclaimer}</div>
-    <button class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);
+    <button type="button" class="btn" data-close="1" style="margin-top:14px">我知道了</button>`);
 }
 
 document.getElementById('resetDemo').addEventListener('click',()=>{
