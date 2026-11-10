@@ -37,7 +37,7 @@ document.addEventListener('click',e=>{
     if(!b)return;
     const facts=ds.barnFacts(b.id);
     const evs=S.events.filter(x=>x.b===b.id);
-    showSheet(`<div class="close" data-close="1">✕</div>
+    showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>${b.nm}</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${b.stock} · ${b.desc} · ${ds.barnOnline(b)?'演示设备在线':'设备离线'}</p>
       <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:11px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
@@ -148,11 +148,12 @@ document.addEventListener('click',e=>{
   if(d.push){
     S.push=!S.push;
     t.classList.toggle('on',S.push);
+    t.setAttribute('aria-checked',String(S.push));
     toast(S.push?'推送已开启 · 首页铃铛将显示提醒':'推送已关闭 · 角标不再更新');
     return}
   if(d.mi){
     const copy=ds.copy();
-    if(d.mi==='hardware'){showSheet(`<div class="close" data-close="1">✕</div>
+    if(d.mi==='hardware'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>硬件管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}台演示设备 · ${S.barns.filter(b=>b.st==='offline').length}台离线</p>
       ${S.barns.map(b=>[b,b.st==='offline'?'离线':'在线',ds.barnFacts(b.id)]).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
@@ -165,7 +166,7 @@ document.addEventListener('click',e=>{
             data-toast="演示提示：尚未连接真实设备">重连</button>`:''}</div>`).join('')}
       <div class="tip" style="margin-top:6px"><span>!</span><span>${copy.hardwareTip}</span></div>
       <div class="sticky"><button class="btn" data-close="1">完成</button></div>`);}
-    else if(d.mi==='barns'){showSheet(`<div class="close" data-close="1">✕</div>
+    else if(d.mi==='barns'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>圈舍管理</h3><p style="margin:0 0 14px;font-size:12px;color:var(--mute)">${S.barns.length}个圈舍 · 含存栏与设备绑定</p>
       ${S.barns.map(b=>[b.nm,b.stock.replace(/[^0-9]/g,'')||0,ds.barnOnline(b)?'在线':'离线']).map(r=>`
         <div style="display:flex;align-items:center;gap:11px;background:#fff;border-radius:12px;
@@ -176,7 +177,7 @@ document.addEventListener('click',e=>{
             <div style="font-size:11px;color:var(--mute)">存栏 ${r[1]} 头 · 设备${r[2]}</div></div>
           <div class="sw on"></div></div>`).join('')}
       <div class="tip" style="margin-top:6px"><span>◖</span><span>${copy.barnManageTip}</span></div>`);}
-    else if(d.mi==='legal'){showSheet(`<div class="close" data-close="1">✕</div>
+    else if(d.mi==='legal'){showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
       <h3>产品免责边界声明</h3>
       <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
         line-height:1.75;color:#7A5A2A;margin-top:12px">${copy.disclaimer}</div>
@@ -192,11 +193,16 @@ document.addEventListener('click',e=>{
     const k=d.pcfg;
     S.pushCfg[k]=!S.pushCfg[k];
     t.classList.toggle('on',S.pushCfg[k]);
+    t.setAttribute('aria-checked',String(S.pushCfg[k]));
     toast(S.pushCfg[k]?`已开启「${pushLabel(k)}」提醒`:`已关闭「${pushLabel(k)}」提醒`);
     return}
   if(d.plevel){
     S.pushCfg.level=d.plevel;
-    document.querySelectorAll('[data-plevel]').forEach(el=>el.classList.toggle('on',el.dataset.plevel===d.plevel));
+    document.querySelectorAll('[data-plevel]').forEach(el=>{
+      const on=el.dataset.plevel===d.plevel;
+      el.classList.toggle('on',on);
+      el.setAttribute('aria-pressed',String(on));
+    });
     toast('提醒强度已更新');
     return}
   if(d.pdnd){
@@ -210,6 +216,16 @@ document.addEventListener('click',e=>{
     toast(`免打扰时段已设为 ${pair[0]} – ${pair[1]}`);
     return}
   if(d.toast){toast(d.toast);return}
+});
+
+/* 键盘触发：用 role="button" 的容器（圈舍卡、指标卡）不享受原生按钮的
+   Enter/Space 行为，这里补上；原生 <button> 不经过这条分支 */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const el=e.target;
+  if(!el||el.getAttribute('role')!=='button')return;
+  e.preventDefault();
+  el.click();
 });
 
 /* 音频库搜索：局部更新，不重渲染整页以保留输入焦点 */

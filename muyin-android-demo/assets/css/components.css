@@ -50,7 +50,8 @@
 .tip.warn{background:var(--red-l);color:#A04038}
 .tip.ok{background:#EDF3EC;color:#3E6B4A}
 .btn{width:100%;margin-top:10px;border:0;border-radius:11px;background:var(--green);color:#fff;
-  padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  padding:12px;font-size:14px;font-weight:600;line-height:normal;text-align:center;
+  cursor:pointer;font-family:inherit;transition:.15s}
 .btn:hover{background:var(--green-d)}
 .btn:disabled{background:#C3C8C2;cursor:not-allowed}
 .btn.ghost{background:var(--card);color:var(--green);border:1.5px solid var(--green)}
@@ -71,12 +72,12 @@
 
 .nav{height:76px;flex:none;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
   border-top:1px solid var(--line);display:flex;padding:8px 10px 12px}
-.nav div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+.nav .navbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   font-size:11.5px;color:var(--mute);cursor:pointer;border-radius:12px;transition:.2s;
   min-width:0;letter-spacing:.5px}
-.nav div.on{background:var(--green);color:#fff;font-weight:600}
-.nav div .gi{font-size:17px;line-height:1;height:21px;display:flex;align-items:center;color:inherit}
-.nav div .gi svg{width:21px;height:21px;display:block;color:inherit}
+.nav .navbtn.on{background:var(--green);color:#fff;font-weight:600}
+.nav .navbtn .gi{font-size:17px;line-height:1;height:21px;display:flex;align-items:center;color:inherit}
+.nav .navbtn .gi svg{width:21px;height:21px;display:block;color:inherit}
 
 .tgt{display:flex;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:none;margin:-4px 0 14px;
   padding-bottom:2px}
@@ -88,18 +89,18 @@
 .tg.dis{opacity:.42;text-decoration:line-through}
 
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px}
-.seg div{background:var(--card);border-radius:13px;padding:13px 6px;text-align:center;cursor:pointer;
+.seg .segbtn{background:var(--card);border-radius:13px;padding:13px 6px;text-align:center;cursor:pointer;
   border:1.5px solid transparent;transition:.18s}
-.seg div.on{background:var(--green);color:#fff;border-color:var(--green)}
-.seg div .gi{font-size:19px;display:block;margin-bottom:5px}
-.seg div b{font-size:13.5px;font-weight:600}
-.seg div small{display:block;font-size:10px;opacity:.72;margin-top:2px}
+.seg .segbtn.on{background:var(--green);color:#fff;border-color:var(--green)}
+.seg .segbtn .gi{font-size:19px;display:block;margin-bottom:5px}
+.seg .segbtn b{font-size:13.5px;font-weight:600}
+.seg .segbtn small{display:block;font-size:10px;opacity:.72;margin-top:2px}
 
 .tpl{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.tpl div{background:var(--card);border-radius:13px;padding:12px 8px;text-align:center;cursor:pointer;
+.tpl .tplbtn{background:var(--card);border-radius:13px;padding:12px 8px;text-align:center;cursor:pointer;
   border:1.5px solid transparent;transition:.18s;position:relative}
-.tpl div:hover{transform:translateY(-2px)}
-.tpl div.on{background:var(--orange-l);border-color:var(--orange)}
+.tpl .tplbtn:hover{transform:translateY(-2px)}
+.tpl .tplbtn.on{background:var(--orange-l);border-color:var(--orange)}
 .tpl .gi{font-size:18px;color:var(--orange);display:block;margin-bottom:5px}
 .tpl b{font-size:12.5px;font-weight:600;display:block}
 .tpl small{font-size:9.5px;color:var(--mute);display:block;margin-top:3px;line-height:1.4}
@@ -140,7 +141,7 @@
 .seektip.on{opacity:1}
 
 .lib{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:13px;padding:12px;
-  margin-bottom:9px;cursor:pointer;transition:.18s}
+  width:100%;margin-bottom:9px;cursor:pointer;transition:.18s}
 .lib:hover{background:#FCFCFA}
 .lib .ic{width:38px;height:38px;border-radius:10px;background:var(--orange-l);display:grid;place-items:center;
   font-size:15px;color:var(--orange);flex:none}
@@ -157,7 +158,7 @@
 .search input::placeholder{color:#B4B9B3}
 
 .banner{background:var(--red-l);border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer;
-  border-left:3px solid var(--red);transition:.18s}
+  width:100%;border-left:3px solid var(--red);transition:.18s}
 .banner:hover{background:#F8E4E1}
 .banner b{font-size:12.5px;color:var(--red);display:block}
 .banner p{margin:4px 0 0;font-size:11.5px;color:#8C5C55;line-height:1.55}
@@ -190,13 +191,14 @@
 .ev .nt{background:var(--sub);border-radius:8px;padding:7px 10px;font-size:11.5px;color:var(--mute);
   margin:9px 0 10px;line-height:1.5}
 .ev .act{width:100%;border:1.5px solid var(--green);background:var(--card);color:var(--green);
-  border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  border-radius:10px;padding:10px;font-size:13px;font-weight:600;line-height:normal;text-align:center;
+  cursor:pointer;font-family:inherit}
 .ev .act.proc{border-color:var(--orange);color:#9A6A22;background:var(--orange-l);font-weight:600}
 .ev .act.done{background:var(--green);color:#fff;border-color:var(--green)}
 .ev .act:disabled{opacity:.75;cursor:default}
 
 .me .user{background:var(--card);border-radius:15px;padding:16px;display:flex;gap:13px;align-items:center;
-  margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer}
+  width:100%;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer}
 .ava{width:54px;height:54px;border-radius:50%;background:var(--green);display:grid;place-items:center;
   color:#fff;flex:none}
 .ava svg{width:26px;height:26px;display:block;color:#fff}
@@ -205,7 +207,7 @@
   padding:3px 9px;border-radius:20px;font-weight:600}
 .me .user p{margin:6px 0 0;font-size:11.5px;color:var(--mute)}
 .mi{background:var(--card);border-radius:13px;padding:14px;margin-bottom:9px;display:flex;gap:13px;
-  align-items:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:.18s}
+  width:100%;align-items:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:.18s}
 .mi:hover{transform:translateX(2px)}
 .mi .ic{width:38px;height:38px;border-radius:11px;background:#EDF3EC;color:var(--green);display:grid;
   place-items:center;font-size:16px;flex:none}
@@ -261,3 +263,17 @@
   background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .sw.on{background:var(--green)}
 .sw.on::after{left:22px}
+
+/* ---------- 可用性：触控热区与滚动锁定 ----------
+   小控件保持原本的视觉尺寸，用透明伪元素把可点区域补足到 44×44 左右。 */
+.sw::before{content:"";position:absolute;left:-10px;right:-10px;top:-10px;bottom:-10px;border-radius:14px}
+.ctrls .c::before{content:"";position:absolute;inset:-3px;border-radius:50%}
+.heart::before{content:"";position:absolute;inset:-4px;border-radius:50%}
+.stat .v .info::before{content:"";position:absolute;inset:-16px}
+.sheet .close::before{content:"";position:absolute;inset:-8px;border-radius:50%}
+.ctrls .c,.heart,.stat .v .info,.sw{position:relative}
+/* 章节右侧的「查看全部 / 收起」，可点可聚焦 */
+.sect .sectlink{font-size:12px;color:var(--mute);cursor:pointer;position:relative}
+.sect .sectlink::before{content:"";position:absolute;inset:-12px -8px}
+/* 弹层打开时锁住背景列表，避免滚动穿透 */
+.scroll.locked{overflow:hidden}

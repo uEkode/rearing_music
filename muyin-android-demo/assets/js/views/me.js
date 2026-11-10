@@ -17,15 +17,15 @@ function viewMe(){
     push:`${pushOn} 项提醒已开启 · 免打扰 ${p.dnd?p.dndStart+'–'+p.dndEnd:'关闭'}`
   };
   return `<div class="hd"><div><h1>我的</h1><p>账户 · 设备 · 帮助</p></div>
-      <div class="iconbtn" data-toast="设置页">⚙</div></div>
-    <div class="me"><div class="user" data-toast="账号与授权管理">
-      <div class="ava">${NAV_ICON.me}</div>
+      <button type="button" class="iconbtn" data-toast="设置页" aria-label="设置">⚙</button></div>
+    <div class="me"><button type="button" class="user" data-toast="账号与授权管理">
+      <div class="ava" aria-hidden="true">${NAV_ICON.me}</div>
       <div><b>${user.name}</b><span class="role">● ${user.role}</span>
-        <p>${farm.name} · ${farm.area} · 已授权${S.barns.length}个圈舍</p></div></div></div>
+        <p>${farm.name} · ${farm.area} · 已授权${S.barns.length}个圈舍</p></div></button></div>
     <div class="sect"><h2>功能与服务</h2><span></span></div>
-    ${ds.meItems().map(it=>`<div class="mi ${it.warn?'warn':''}" data-mi="${it.key}">
-      <div class="ic">${it.ic}</div><div><b>${it.title}</b><small>${descOf[it.key]||it.desc}</small></div>
-      <div class="ar">›</div></div>`).join('')}
+    ${ds.meItems().map(it=>`<button type="button" class="mi ${it.warn?'warn':''}" data-mi="${it.key}">
+      <div class="ic" aria-hidden="true">${it.ic}</div><div><b>${it.title}</b><small>${descOf[it.key]||it.desc}</small></div>
+      <div class="ar" aria-hidden="true">›</div></button>`).join('')}
     <div style="height:8px"></div>`;
 }
 

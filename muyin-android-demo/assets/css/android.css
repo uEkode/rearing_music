@@ -7,11 +7,12 @@ body{padding:0;min-height:0;display:block;background:var(--bg)}
 .statusbar{display:none}
 .screen{padding-top:0}
 .demo-strip{flex:none;background:#E8EFE8;color:#33503E;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;border-bottom:1px solid #D5DFD4}
-.demo-strip button{border:1px solid #789180;border-radius:7px;background:white;color:#33503E;padding:5px 9px;min-height:36px;font-size:12px}
+.demo-strip button{border:1px solid #789180;border-radius:7px;background:white;color:#33503E;padding:5px 9px;min-height:44px;font-size:12px;line-height:normal}
 .scroll{padding-top:12px;min-height:0;overscroll-behavior:contain}
 .nav{height:70px;padding-bottom:8px}
-.nav>div{min-height:48px}
-.btn,.act,.chip{min-height:44px}
+.nav>.navbtn{min-height:48px}
+.btn,.act,.chip,.tg{min-height:44px}
+.tg{display:inline-flex;align-items:center;justify-content:center}
 .iconbtn{width:44px;height:44px}
 .sheet .close{width:44px;height:44px;right:8px;top:6px;display:grid;place-items:center}
 .sheet .panel{max-height:90%;overflow-y:auto}

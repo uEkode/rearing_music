@@ -46,6 +46,8 @@ function paintProgress(){
   if(tip)tip.style.left=pct+'%';
   const tm=$('timeCur');
   if(tm)tm.textContent=fmt(S.track.pos);
+  bar.setAttribute('aria-valuenow',String(S.track.pos));
+  bar.setAttribute('aria-valuetext',`${fmt(S.track.pos)} / ${fmt(S.track.dur)}`);
 }
 
 /* 干预结束的统一收尾：事件转已处理 + 圈舍转恢复观察 */

@@ -1,6 +1,15 @@
 /* 基础层：重置、页面容器、手机外壳、滚动区。
    桌面预览时是 390×844 的手机模型，安卓版由 android.css 铺满屏幕。 */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+/* 可点元素统一用 <button type="button">，这里抹掉浏览器默认外观，
+   具体样式仍由各组件类决定 */
+button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:0;padding:0;margin:0;
+  display:block;text-align:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button:disabled{cursor:default}
+/* 键盘焦点：只在用键盘操作时显示，不影响鼠标点击的观感 */
+:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px}
+
 body{margin:0;background:#F2F1EC;color:var(--ink);
   font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   display:flex;padding:24px;align-items:center;justify-content:center;min-height:100vh}

@@ -19,7 +19,7 @@ document.querySelector('.demo-strip span').textContent=ds.app().strip;
 render();
 if(!S.seenNotice){
   S.seenNotice=true;
-  MY.sheets.showSheet(`<div class="close" data-close="1">✕</div>
+  MY.sheets.showSheet(`<button type="button" class="close" data-close="1" aria-label="关闭">✕</button>
     <h3>开始前请知悉</h3>
     <p style="margin:0 0 14px;font-size:12px;color:var(--mute)">本工具的使用边界</p>
     <div style="background:var(--amber-l);border-radius:12px;padding:14px;font-size:12.5px;
@@ -30,7 +30,7 @@ if(!S.seenNotice){
 document.getElementById('resetDemo').addEventListener('click',()=>{
   if(!window.confirm('重置本机演示进度？本机的模拟处理记录和设置将恢复初始状态。'))return;
   stopTimer();Object.assign(S,JSON.parse(JSON.stringify(initialDemoState)));
-  S.seenNotice=true;document.getElementById('sheet').classList.remove('on');
+  S.seenNotice=true;MY.sheets.hideSheet();
   saveDemo();render();toast('已恢复初始演示场景');
 });
 document.addEventListener('click',()=>setTimeout(saveDemo,0));

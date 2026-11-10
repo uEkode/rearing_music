@@ -21,11 +21,11 @@ function render(){
   $('mini').innerHTML=(S.playing&&S.page!=='music')?`<div class="mini">
       <div class="mi-t"><b>${S.track.nm}</b><small>${S.track.s}</small></div>
       <div class="mi-p"><span id="miniTime">${fmt(S.track.pos)}</span> / ${fmt(S.track.dur)}</div>
-      <div class="mi-b" data-miniplay="1">❚❚</div>
+      <button type="button" class="mi-b" data-miniplay="1" aria-label="暂停播放">❚❚</button>
     </div>`:'';
   const navs=[['home','首页'],['music','干预'],['events','事件'],['me','我的']];
-  $('nav').innerHTML=navs.map(n=>`<div class="${S.page===n[0]?'on':''}" data-tab="${n[0]}">
-    <span class="gi">${NAV_ICON[n[0]]}</span>${n[1]}</div>`).join('');
+  $('nav').innerHTML=navs.map(n=>`<button type="button" class="navbtn ${S.page===n[0]?'on':''}" data-tab="${n[0]}"${S.page===n[0]?' aria-current="page"':''}>
+    <span class="gi" aria-hidden="true">${NAV_ICON[n[0]]}</span>${n[1]}</button>`).join('');
 }
 
 MY.app={go,setTab,render};
